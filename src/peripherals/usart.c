@@ -17,8 +17,31 @@
  */
 
 #include "usart.h"
+#include "assert.h"
+
+int _usart_data_length(int data_length)
+{
+    assert(data_length >= 7 && data_length <= 9);
+    switch(data_length) {
+        case 7: // M[1:0] = '00'
+            break;
+        case 8: // M[1:0] = '01'
+            USART1->CR1 |= USART_CR1_M0;
+            break;
+        case 9: // M[1:0] = '10'
+            USART1->CR1 |= USART_CR1_M0;
+            USART1->CR1 |= USART_CR1_M1;
+            break;
+        default:;
+    }
+
+    return 0;
+}
 
 int init_usart(int data_length)
 {
- 
+    _usart_data_length(data_length);
+
+    return 0;
 }
+

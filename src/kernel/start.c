@@ -1,4 +1,7 @@
 /*
+ * @file start.c
+ * The first file that is run when the board is booted.
+ *
  * Copyright (C) 2018  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
@@ -22,9 +25,14 @@
 
 #include "peripherals/usart.h"
 
-void main(void) 
+int main(void) 
 {
     RCC->AHB4ENR |= RCC_AHB4ENR_GPIOGEN;
-    init_uart(9);
+    volatile uint32_t* usart = (uint32_t *)USART1_BASE;
+    init_usart(9);
+
     while(1){};
+    (void)usart;
+
+    return 0;
 }
