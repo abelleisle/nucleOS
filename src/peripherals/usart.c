@@ -42,6 +42,9 @@ int init_usart(int data_length)
 {
     _usart_data_length(data_length);
 
+    USART1->CR1 |= (USART_CR1_TE | USART_CR1_RE);
+    USART1->CR1 |= USART_CR1_UE;
+
     return 0;
 }
 
