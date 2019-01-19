@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
+ * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,14 +14,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ */ 
 
 #ifndef USART_H
 #define USART_H
 
 #include "system/stm32h743xx.h"
 
-int init_usart(int);
+int init_usart(USART_TypeDef*, int);
+int PutChar(USART_TypeDef*, char);
 
 
 #endif //USART_H

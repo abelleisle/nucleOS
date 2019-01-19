@@ -30,7 +30,7 @@ OBJ_DIR = out
 O_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(C_FILES)) \
 		  $(patsubst $(SRC_DIR)/%.s, $(OBJ_DIR)/%.s.o, $(S_FILES))
 
-CPU_FLAGS = -mthumb -mcpu=cortex-m7
+CPU_FLAGS = -mcpu=cortex-m7
 C_FLAGS = $(CPU_FLAGS) --specs=nosys.specs -Isrc/ -Ilib/ -Ilib/system/ \
 					   -Ilib/cmsis/inc -Llib/cmsis/gcc -L. -DSTM32H743xx \
 		  				-Wall -Werror
