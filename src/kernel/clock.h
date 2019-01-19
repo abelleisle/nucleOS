@@ -21,8 +21,17 @@
 
 #include "stm32h743xx.h"
 
+/**
+ * Initialize the System Tick interrupt for clock ticks
+ */
 void Clock_Init(void);
 
-void Clock_Delay(uint32_t);
+/**
+ * Delay current execution for a certain number of milliseconds.
+ * NOTE: This function will be running for however many ms are passed
+ *  into this function.
+ * @param delay How many milliseconds to delay the program.
+ */
+void Clock_Delay(uint32_t delay);
 
 #endif // CLOCK_H

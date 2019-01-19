@@ -19,20 +19,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// C LIBS
 #include "stdint.h"
+#include "stdio.h"
+
+// STM LIBS
 #include "system/system_stm32h7xx.h"
 #include "system/stm32h743xx.h"
 
+// MY HEADERS
 #include "peripherals/usart.h"
+#include "peripherals/gpio.h"
+#include "kernel/clock.h"
 
 int main(void) 
 {
-    RCC->AHB4ENR |= RCC_AHB4ENR_GPIOGEN;
-    volatile uint32_t* usart = (uint32_t *)USART1_BASE;
-    init_usart(9);
+    Clock_Init();
+    
+    //init_usart(USART3, 8);
+    GPIO_Init();
+    GPIO_Mode(GPIOB, 0, OUTPUT);
 
-    while(1){};
-    (void)usart;
+    while (1) {
+        GPIO_TogglePin(GPIOB, 0);
+        Clock_Delay(1000);
+    };
 
     return 0;
 }

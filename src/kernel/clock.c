@@ -18,13 +18,20 @@
 
 #include "clock.h"
 
+// The number of clock ticks that have been run since the start of the OS.
 volatile uint32_t clock_ticks = 0;
 
 void Clock_Init(void)
 {
-    SysTick_Config(SystemCoreClock/1000);
+    // Set the number of ticks to skip for the System Tick IRQ by taking
+    //  HCLK (system clock) and dividing it by the number of times per second
+    //  this should trigger, and subtract one.
+    SysTick_Config((SystemCoreClock/1000)-1);
 }
 
+/**
+ * Accuracy of 1ms.
+ */
 void SysTick_Handler(void)
 {
     clock_ticks++;
