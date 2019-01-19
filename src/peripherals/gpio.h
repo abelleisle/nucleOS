@@ -21,31 +21,44 @@
 
 #include "stm32h7xx.h"
 
+/**
+ * Mode selector for a GPIO pin. The integers are used to set the mode in
+ *  binary in the GPIO control registers.
+ */
 enum GPIO_MODE {
-    MODE_RESET = 0,
-    INPUT = 0,
-    OUTPUT = 1,
-    ALTERNATE = 2,
-    ANALOG = 3
+    MODE_RESET = 0, /**< Resets the GPIO pin to default state (input) */
+    INPUT = 0,      /**< Sets the GPIO pin to input mode (default) */
+    OUTPUT = 1,     /**< Sets the GPIO pin to output mode */
+    ALTERNATE = 2,  /**< Allows the GPIO pin to get used for other things */
+    ANALOG = 3      /**< Sets the GPIO pin to analog mode */
 };
 
+/**
+ * Sets the type of a GPIO pin.
+ */
 enum GPIO_TYPE {
-    TYPE_RESET = 0,
-    PUSH_PULL = 0,
-    OPEN = 1
+    TYPE_RESET = 0, /**< Resets the pin to default type (push/pull) */
+    PUSH_PULL = 0,  /**< Sets the pin to push/pull mode. */
+    OPEN_DRAIN = 1  /**< Sets pin to open/drain mode. */
 };
 
+/**
+ * Sets the speed of a GPIO pin.
+ */
 enum GPIO_SPEED {
-    LOW = 0,
-    MEDIUM = 1,
-    HIGH = 2,
-    VERY_HIGH = 3
+    LOW = 0,        /**< Low speed */
+    MEDIUM = 1,     /**< Medium speed */
+    HIGH = 2,       /**< High speed */
+    VERY_HIGH = 3   /**< Very high speed */
 };
 
-enum GPIO_PUPDT {
-    NO = 0,
-    UP = 1,
-    DOWN = 2
+/**
+ * Pull up or pull down resistor modes for GPIO pins.
+ */
+enum GPIO_PUPDR {
+    NO = 0,         /**< No pull-up/pull-down resistor */
+    UP = 1,         /**< Pull-up resistor */
+    DOWN = 2        /**< Pull-down resistor */
 };
 
 /**
@@ -95,7 +108,7 @@ void GPIO_Speed(GPIO_TypeDef* port, uint32_t pin, enum GPIO_SPEED speed);
  * @param pupd What resistor mode to set the pin to.
  * @see GPIO_PUPDT
  */
-void GPIO_PUPD(GPIO_TypeDef* port, uint32_t pin, enum GPIO_PUPDT pupd);
+void GPIO_PUPD(GPIO_TypeDef* port, uint32_t pin, enum GPIO_PUPDR pupd);
 
 /**
  * Sets an alternate mode for a GPIO pin.

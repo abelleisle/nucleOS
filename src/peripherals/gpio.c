@@ -42,7 +42,7 @@ void GPIO_Speed(GPIO_TypeDef* port, uint32_t pin, enum GPIO_SPEED speed)
     port->OSPEEDR |= speed << (2 * pin);
 }
 
-void GPIO_PUPD(GPIO_TypeDef* port, uint32_t pin, enum GPIO_PUPDT pupd)
+void GPIO_PUPD(GPIO_TypeDef* port, uint32_t pin, enum GPIO_PUPDR pupd)
 {
     port->PUPDR &= ~(3 << (2 * pin));
     port->PUPDR |= pupd << (2 * pin);
@@ -50,32 +50,37 @@ void GPIO_PUPD(GPIO_TypeDef* port, uint32_t pin, enum GPIO_PUPDT pupd)
 
 void GPIO_AlternateMode(GPIO_TypeDef* port, uint32_t pin, uint32_t mode)
 {
+    /*
+     * Pins 0-7 use AFRL and pins 8-15 use AFRH.
+     * By dividing the pin by 8 we can get 0 for 0-7 and 1 for 8-15.
+     *  This will give the selection value for either AFRL or AFRH
+     */
     port->AFR[pin/8] &= ~(0xF << (pin % 8));
     port->AFR[pin/8] |= mode << (pin % 8);
 }
 
 void GPIO_SetValue(GPIO_TypeDef* port, uint32_t pin, uint32_t value)
 {
-    if (value) // setting the value
-        port->BSRRL |= (1 << pin);
-    else //  resetting the pin
-        port->BSRRH |= (1 << pin);
+    if (value)  // setting the value
+        GPIO_SetPin(port, pin);
+    else        // resetting the pin
+        GPIO_ResetPin(port, pin);
 }
 
 void GPIO_SetPin(GPIO_TypeDef* port, uint32_t pin)
 {
-    port->BSRRL |= (1 << pin);
+    port->BSRRL |= (1 << pin); // BSRRL is for setting pins
 }
 
 void GPIO_ResetPin(GPIO_TypeDef* port, uint32_t pin)
 {
-    port->BSRRH |= (1 << pin);
+    port->BSRRH |= (1 << pin); // BSRRH is for resetting pins
 }
 
 void GPIO_TogglePin(GPIO_TypeDef* port, uint32_t pin)
 {
     uint32_t val = GPIO_GetValue(port, pin);
-    GPIO_SetValue(port, pin, !val);
+    GPIO_SetValue(port, pin, !val); // flip current value
 }
 
 uint32_t GPIO_GetValue(GPIO_TypeDef* port, uint32_t pin)
