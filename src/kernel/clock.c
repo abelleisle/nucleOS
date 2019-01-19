@@ -40,5 +40,5 @@ void SysTick_Handler(void)
 void Clock_Delay(uint32_t delay)
 {
     uint32_t expected = clock_ticks + delay;
-    while(clock_ticks < expected);
+    while(clock_ticks < expected); // hang here until delay is done
 }

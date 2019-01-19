@@ -48,26 +48,115 @@ enum GPIO_PUPDT {
     DOWN = 2
 };
 
+/**
+ * Initializes all the GPIO clocks for all GPIO ports.
+ * (Ports A through K)
+ */
 void GPIO_Init(void);
 
+/**
+ * Sets the type of a certain GPIO pin.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @param type What type this pin will be set to.
+ * @see GPIO_TYPE
+ */
 void GPIO_Type(GPIO_TypeDef* port, uint32_t pin, enum GPIO_TYPE type);
 
+/**
+ * Sets the mode of a particular GPIO pin.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @param mode The mode this specific pin will be set to.
+ * @see GPIO_MODE
+ */
 void GPIO_Mode(GPIO_TypeDef* port, uint32_t pin, enum GPIO_MODE mode);
 
+/**
+ * Sets the speed of a certain GPIO pin.
+ *  STM standard lets this pin either be: low, medium, high, or very high speed.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @param speed What speed to set this pin too
+ * @see GPIO_SPEED
+ */
 void GPIO_Speed(GPIO_TypeDef* port, uint32_t pin, enum GPIO_SPEED speed);
 
+/**
+ * Sets the pull up or pull down resistor for a certain GPIO pin.
+ *  Every GPIO pin has a pull-up and pull-down resistor attached, and this
+ *  function lets us either set or unset one of these resistors.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @param pupd What resistor mode to set the pin to.
+ * @see GPIO_PUPDT
+ */
 void GPIO_PUPD(GPIO_TypeDef* port, uint32_t pin, enum GPIO_PUPDT pupd);
 
+/**
+ * Sets an alternate mode for a GPIO pin.
+ *  GPIO pins have alternate modes. These modes allow external devices on the
+ *  chip to control the pin. This is what allows these pins to be used for
+ *  things like serial over USART, or SPI.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @param mode What alternative mode to set each pin to.
+ *  The pins have 16 differenet modes that can be set, so this has to be a value
+ *  of 0-15. Every pin has different specs for what its alternate functions
+ *  can be, so the STM documentation for each chip should be checked to find
+ *  the mode for this pin.
+ */
 void GPIO_AlternateMode(GPIO_TypeDef* port, uint32_t pin, uint32_t mode);
 
+/**
+ * Set the output value of a certain GPIO pin.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @param value The value the pin will be set to. A value of zero won't set
+ *  the pin voltage, and anything but zero will set the pin voltage.
+ */
 void GPIO_SetValue(GPIO_TypeDef* port, uint32_t pin, uint32_t value);
 
+/**
+ * Sets a certain GPIO pin voltage to high.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @see GPIO_SetValue()
+ */
 void GPIO_SetPin(GPIO_TypeDef* port, uint32_t pin);
 
+/**
+ * Sets a certain GPIO pin voltage to low.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @see GPIO_SetValue()
+ */
 void GPIO_ResetPin(GPIO_TypeDef* port, uint32_t pin);
 
+/**
+ * Flips the output of a certain GPIO pin.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @see GPIO_SetValue()
+ */
 void GPIO_TogglePin(GPIO_TypeDef* port, uint32_t pin);
 
+/**
+ * Reads the value from a given GPIO pin.
+ *
+ * @param port The GPIO port that this pin belongs to.
+ * @param pin The specific pin in our port that will be modified.
+ * @return uint32_t Returns 1 if the pin is high and 0 if the pin is low.
+ */
 uint32_t GPIO_GetValue(GPIO_TypeDef* port, uint32_t pin);
 
 #endif // GPIO_H
