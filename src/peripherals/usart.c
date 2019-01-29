@@ -17,6 +17,7 @@
  */
 
 #include "usart.h"
+#include "gpio.h"
 #include "assert.h"
 #include "system_stm32h7xx.h"
 
@@ -43,11 +44,11 @@ int init_usart(USART_TypeDef *usart, int data_length)
 {
     _usart_data_length(usart, data_length);
 
-    GPIO_Mode(GPIOD, 8, ALTERNATE)
-    GPIO_Mode(GPIOD, 9, ALTERNATE)
+    GPIO_Mode(GPIOD, 8, ALTERNATE);
+    GPIO_Mode(GPIOD, 9, ALTERNATE);
 
-    GPIO_AlternativeMode(GPIOD, 8, 7);
-    GPIO_AlternativeMode(GPIOD, 9, 7);
+    GPIO_AlternateMode(GPIOD, 8, 7);
+    GPIO_AlternateMode(GPIOD, 9, 7);
 
     //usart->BRR = 0x0341h;
 	RCC->APB1LENR |= RCC_APB1LENR_USART3EN;
