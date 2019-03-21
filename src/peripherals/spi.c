@@ -1,4 +1,7 @@
 /*
+ * @file spi.c
+ * SPI library function bodies
+ *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
