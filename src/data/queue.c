@@ -1,4 +1,6 @@
 /*
+ * @file queue.c
+ *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
@@ -14,14 +16,39 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 
-#ifndef USART_H
-#define USART_H
+#include "queue.h"
 
-// STM LIBS
-#include "system/stm32h743xx.h"
+#include "stdlib.h"
 
-int USART_Init(USART_TypeDef*, uint32_t, int);
+int Queue_Init(Queue* queue, int capacity)
+{
+    // allocate queue data
+    queue->buffer = (uint8_t*)malloc(capacity, sizeof (uint8_t));
 
-#endif //USART_H
+    queue->capacity = capacity;
+    queue->size = 0;
+
+    queue->first = 0;
+    queue->last = 0;
+
+
+    return 0;
+}
+
+int Queue_Enqueue(Queue* queue, uint8_t data)
+{
+}
+
+uint8_t Queue_Dequeue(Queue* queue)
+{
+    return buffer[first];
+}
+
+int Queue_Destroy(Queue* queue)
+{
+    free(queue->buffer);
+
+    return 0;
+}

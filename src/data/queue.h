@@ -1,4 +1,6 @@
 /*
+ * @file queue.h
+ *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
@@ -14,14 +16,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 
-#ifndef USART_H
-#define USART_H
+#ifndef QUEUE_H
+#define QUEUE_H
 
-// STM LIBS
-#include "system/stm32h743xx.h"
+#include "stdint.h"
 
-int USART_Init(USART_TypeDef*, uint32_t, int);
+typedef struct
+{
+    int first;
+    int last;
+    int size;
+    int capacity;
+    uint8_t* buffer;
+} Queue;
 
-#endif //USART_H
+int Queue_Init(Queue*, int);
+int Queue_Enqueue(Queue*, uint8_t);
+uint8_t Queue_Dequeue(Queue*);
+int Queue_Destroy(Queue*);
+
+#endif //QUEUE_H

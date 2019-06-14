@@ -1,4 +1,6 @@
 /*
+ * @file serial.h
+ *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
@@ -14,14 +16,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 
-#ifndef USART_H
-#define USART_H
+#ifndef SERIAL_H
+#define SERIAL_H
 
 // STM LIBS
-#include "system/stm32h743xx.h"
+#include "system/stm32h7xx.h"
 
-int USART_Init(USART_TypeDef*, uint32_t, int);
+int Serial_Init(uint32_t, int);
 
-#endif //USART_H
+int PutChar(char);
+char GetChar();
+
+#endif //SERIAL_H

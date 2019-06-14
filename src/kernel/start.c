@@ -31,17 +31,32 @@
 #include "peripherals/usart.h"
 #include "peripherals/gpio.h"
 #include "kernel/clock.h"
+#include "peripherals/serial.h"
 
 int main(void) 
 {
     Clock_Init();
-    
-    //init_usart(USART3, 8);
     GPIO_Init();
+
+    RCC->AHB3ENR |= ~(RCC_AHB3RSTR_CPURST | RCC_AHB3RSTR_FMCRST);
+    
     GPIO_Mode(GPIOB, 0, OUTPUT);
+    GPIO_Mode(GPIOB, 7, OUTPUT);
+    //USART_Init(USART3, 115200, 8);
+    Serial_Init(115200, 8);
 
     while (1) {
+        static char c = 'a';
         GPIO_TogglePin(GPIOB, 0);
+
+        c += 1;
+        if (c >= 123)
+            c = 97;
+        PutChar(c);
+
+        //if (GetChar() == 'f')
+        //    GPIO_TogglePin(GPIOB, 7);
+
         Clock_Delay(1000);
     };
 

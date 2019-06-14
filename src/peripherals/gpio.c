@@ -55,8 +55,8 @@ void GPIO_AlternateMode(GPIO_TypeDef* port, uint32_t pin, uint32_t mode)
      * By dividing the pin by 8 we can get 0 for 0-7 and 1 for 8-15.
      *  This will give the selection value for either AFRL or AFRH
      */
-    port->AFR[pin/8] &= ~(0xF << (pin % 8));
-    port->AFR[pin/8] |= mode << (pin % 8);
+    port->AFR[pin/8] &= ~(0xF << (pin % 8)*4);
+    port->AFR[pin/8] |= mode << (pin % 8)*4;
 }
 
 void GPIO_SetValue(GPIO_TypeDef* port, uint32_t pin, uint32_t value)

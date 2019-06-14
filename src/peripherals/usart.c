@@ -1,4 +1,6 @@
 /*
+ * @file: usart.c
+ *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
@@ -16,10 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// HEADER
 #include "usart.h"
+
+// STM LIBS
+#include "system/stm32h7xx.h"
+
+// MY HEADERS
 #include "gpio.h"
+#include "kernel/clock.h"
 #include "assert.h"
-#include "system_stm32h7xx.h"
 
 int _usart_data_length(USART_TypeDef *usart, int data_length)
 {
@@ -40,19 +48,18 @@ int _usart_data_length(USART_TypeDef *usart, int data_length)
     return 0;
 }
 
-int init_usart(USART_TypeDef *usart, int data_length)
+int USART_Init(USART_TypeDef *usart,
+               uint32_t baud,
+               int data_length)
 {
     _usart_data_length(usart, data_length);
 
-    GPIO_Mode(GPIOD, 8, ALTERNATE);
-    GPIO_Mode(GPIOD, 9, ALTERNATE);
-
-    GPIO_AlternateMode(GPIOD, 8, 7);
-    GPIO_AlternateMode(GPIOD, 9, 7);
-
-    //usart->BRR = 0x0341h;
-	RCC->APB1LENR |= RCC_APB1LENR_USART3EN;
-    usart->BRR = 64000000U/9600U;
+    if (usart == USART3)
+        RCC->APB1LENR |= RCC_APB1LENR_USART3EN;
+    //RCC->APB1LLPENR |= RCC_APB1LENR_USART3EN; // low power mode
+    usart->BRR = SystemCoreClock/baud;
+    //usart->BRR = SystemD2Clock/9600U;
+    //usart->BRR = 96000000U/9600U;
 
     usart->CR1 |= (USART_CR1_TE | USART_CR1_RE); // enable rx and tx
 
@@ -63,10 +70,3 @@ int init_usart(USART_TypeDef *usart, int data_length)
     return 0;
 }
 
-int PutChar(USART_TypeDef *usart, char c)
-{
-    while(!(usart->ISR & USART_ISR_TXE));
-    usart->TDR = c & 0xFF;
-
-    return 1;
-}
