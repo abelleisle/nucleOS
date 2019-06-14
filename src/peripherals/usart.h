@@ -19,10 +19,9 @@
 #ifndef USART_H
 #define USART_H
 
+// STM LIBS
 #include "system/stm32h743xx.h"
 
-int init_usart(USART_TypeDef*, int);
-int PutChar(USART_TypeDef*, char);
-
+int USART_Init(USART_TypeDef*, uint32_t, int);
 
 #endif //USART_H
