@@ -25,7 +25,7 @@
 int Queue_Init(Queue* queue, int capacity)
 {
     // allocate queue data
-    queue->buffer = (uint8_t*)malloc(capacity, sizeof (uint8_t));
+    queue->buffer = (uint8_t*)malloc(capacity * sizeof (uint8_t));
 
     queue->capacity = capacity;
     queue->size = 0;
@@ -39,11 +39,12 @@ int Queue_Init(Queue* queue, int capacity)
 
 int Queue_Enqueue(Queue* queue, uint8_t data)
 {
+    return 0;
 }
 
 uint8_t Queue_Dequeue(Queue* queue)
 {
-    return buffer[first];
+    return queue->buffer[queue->first];
 }
 
 int Queue_Destroy(Queue* queue)

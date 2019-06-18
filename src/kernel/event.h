@@ -1,5 +1,5 @@
 /*
- * @file task.h
+ * @file event.h
  *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
@@ -18,20 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef EVENT_H
+#define EVENT_H
 
-#ifndef TASK_H
-#define TASK_H
+typedef enum
+{
+    NSIGNAL_TASK_INIT = 0,
+    NSIGNAL_TASK_KILL = 1,
 
-// STD
-#include "stdint.h"
+} nSignal;
 
-// KERNEL
-#include "event.h"
+typedef uint8_t nParam;
 
-typedef void (*nTask)(nEvent e);
+typedef struct
+{
+    nSignal sig;
+    nParam par;
+} nEvent;
 
-void nTask_Init(nTask task, uint32_t priority,
-                nEvent* queue, uint32_t queueLength,
-                nSignal sig, nParam par);
-
-#endif // TASK_H
+#endif //EVENT_H
