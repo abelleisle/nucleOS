@@ -35,6 +35,7 @@
 
 int main(void) 
 {
+    __disable_irq();
     Clock_Init();
     GPIO_Init();
 
@@ -44,6 +45,8 @@ int main(void)
     GPIO_Mode(GPIOB, 7, OUTPUT);
     //USART_Init(USART3, 115200, 8);
     Serial_Init(115200, 8);
+
+    __enable_irq();
 
     while (1) {
         static char c = 'a';
