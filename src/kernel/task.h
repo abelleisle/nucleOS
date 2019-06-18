@@ -1,16 +1,37 @@
+/*
+ * @file task.h
+ *
+ * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
+ * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef TASK_H
 #define TASK_H
 
+// STD
 #include "stdint.h"
 
-struct task_t {
-    uint32_t *sp; /**< Last value of stack pointer for this stack. */
-    uint32_t *stack; /**< Location of the stack of this task. */
-    uint32_t *heap; /**< Location of heap for this task. */
+// KERNEL
+#include "event.h"
 
-    uint32_t pid; /**< Process I.D. */
-};
+typedef void (*nTask)(nEvent e);
 
-uint32_t* init_task(struct task_t *init, uint32_t stack_size);
+void nTask_Init(nTask task, uint32_t priority,
+                nEvent* queue, uint32_t queueLength,
+                nSignal sig, nParam par);
 
 #endif // TASK_H
