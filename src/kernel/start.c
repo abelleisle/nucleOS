@@ -27,7 +27,7 @@
 #include "system/system_stm32h7xx.h"
 #include "system/stm32h743xx.h"
 
-// MY HEADERS
+// KERNEL
 #include "peripherals/usart.h"
 #include "peripherals/gpio.h"
 #include "kernel/clock.h"

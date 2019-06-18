@@ -22,7 +22,7 @@
 #ifndef TASK_H
 #define TASK_H
 
-// STD
+// C LIBS
 #include "stdint.h"
 
 // KERNEL
@@ -30,8 +30,22 @@
 
 typedef void (*nTask)(nEvent e);
 
-void nTask_Init(nTask task, uint32_t priority,
+/**************************
+ *  PLATFORM INDEPENDENT  *
+ **************************/
+void nTask_init(void);
+void nTask_create(nTask task, uint32_t priority,
                 nEvent* queue, uint32_t queueLength,
                 nSignal sig, nParam par);
 
+void nTask_run(void);
+
+void _nTask_schedule(void);
+
+/******************
+ *  USER DEFINED  *
+ ******************/
+void nTask_start(void);
+void nTask_onIdle(void);
+void nTask_exit(void);
 #endif // TASK_H

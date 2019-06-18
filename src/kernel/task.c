@@ -19,13 +19,15 @@
  */
 #include "task.h"
 
-// STD
+// C LIBS
 #include "stdlib.h"
 
-#define MAX_TASKS = 8;
+// KERNEL
+#include "irq.h"
 
-static uint32_t task_pid = 0; // current task process ID
-static uint32_t task_sem = 0; // current task semaphore
+#define MAX_TASKS 8
+
+static uint32_t _nTask_currentPriority;
 
 typedef struct {
     nTask task;     // The task that will actually be running
@@ -34,17 +36,17 @@ typedef struct {
     uint32_t head;  //
     uint32_t tail;
     uint32_t used;
-    utin32_t mask;
+    uint32_t mask;
 } nTaskCB;
 
 static nTaskCB tasks[MAX_TASKS];
 
-void nTask_Init(nTask task, uint32_t priority,
+void nTask_create(nTask task, uint32_t priority,
                 nEvent* queue, uint32_t queueLength,
                 nSignal sig, nParam par)
 {
-    nEvent = ie; // initialization event
-    nTaskCB tcb* = &tasks[priority-1];
+    nEvent ie; // initialization event
+    nTaskCB *tcb = &tasks[priority-1];
     tcb->task = task;
     tcb->queue = queue;
     tcb->end = queueLength;
@@ -54,5 +56,25 @@ void nTask_Init(nTask task, uint32_t priority,
     tcb->mask = (1 << (priority-1));
     ie.sig = sig;
     ie.par = par;
-    tcb->task(ie);
+    tcb->task(ie);                                     /* Initialize the task */
+}
+
+void nTask_run(void)
+{
+    nTask_start(); // start all ISRs
+
+    nIRQ_Lock();
+    _nTask_currentPriority = 0; // set idle loop priority
+    _nTask_schedule();
+    nIRQ_Unlock();
+
+    while (1) {
+        nTask_onIdle();
+        _nTask_schedule();
+    }
+}
+
+void _nTask_schedule(void)
+{
+
 }
