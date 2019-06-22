@@ -28,14 +28,20 @@
 #include "system/stm32h743xx.h"
 
 // KERNEL
+#include "kernel/event.h"
+#include "kernel/clock.h"
+#include "kernel/task.h"
+#include "kernel/irq.h"
+
 #include "peripherals/usart.h"
 #include "peripherals/gpio.h"
-#include "kernel/clock.h"
 #include "peripherals/serial.h"
+
+#include "data/queue.h"
 
 int main(void) 
 {
-    __disable_irq();
+    nIRQ_Lock();
     Clock_Init();
     GPIO_Init();
 
@@ -46,21 +52,27 @@ int main(void)
     //USART_Init(USART3, 115200, 8);
     Serial_Init(115200, 8);
 
-    __enable_irq();
+    nIRQ_Unlock();
+
+    PutString("Hello World!");
 
     while (1) {
         static char c = 'a';
-        GPIO_TogglePin(GPIOB, 0);
+        //GPIO_TogglePin(GPIOB, 0);
 
         c += 1;
         if (c >= 123)
             c = 97;
         PutChar(c);
+        
+        //char b = GetChar();
+
+        //PutChar(b == 0xFF ? '\0' : b);
 
         //if (GetChar() == 'f')
         //    GPIO_TogglePin(GPIOB, 7);
 
-        Clock_Delay(1000);
+        Clock_Delay(1);
     };
 
     return 0;
