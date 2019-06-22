@@ -18,16 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define QUEUE_SIZE 16
+
+// C LIBS
+#include "stdlib.h"
+
 // HEADER
 #include "serial.h"
 
-// MY HEADERS
+// KERNEL
 #include "usart.h"
 #include "gpio.h"
+#include "data/queue.h"
+#include "kernel/irq.h"
+
+static Queue* sendQueue;
+static Queue* recvQueue;
 
 int Serial_Init(uint32_t baudrate, int datalength)
 {
-    USART3->CR1 |= (USART_CR1_TXEIE | USART_CR1_RXNEIE);
+    USART3->CR1 |= USART_CR1_RXNEIE;
 
     GPIO_Mode(GPIOD, 8, ALTERNATE);
     GPIO_Mode(GPIOD, 9, ALTERNATE);
@@ -37,29 +47,45 @@ int Serial_Init(uint32_t baudrate, int datalength)
 
     USART_Init(USART3, baudrate, datalength);
 
+    NVIC_EnableIRQ(USART3_IRQn);
+
+    sendQueue = Queue_Init(QUEUE_SIZE);
+    recvQueue = Queue_Init(QUEUE_SIZE);
+
     return 1;
 }
 
 int PutChar(char c)
 {
-    while(!(USART3->ISR & USART_ISR_TXE));
-    USART3->TDR = c & 0xFF;
+    Queue_Enqueue(sendQueue, c);
+    USART3->CR1 |= USART_CR1_TXEIE; // enable TX interrupt
+    return 0;
+}
 
-    return 1;
+int PutString(char* string)
+{
+    for (char *c = string; *c; c++)
+        PutChar(*c);
+    return 0;
 }
 
 char GetChar() {
-    while(!(USART3->ISR & USART_ISR_RXNE));
-    return USART3->RDR & 0xFF;
+    return Queue_Pop(recvQueue);
 }
 
-void USART3_IRQHandler(void)
+void USART3_IRQHandler()
 {
-    if (USART3->ISR & USART_ISR_RXFF) { // If interrupt was triggered by recieve
-        // push character onto queue
-        // disable rx interrupt
-    } else if (USART3->ISR & USART_ISR_TXFE) { // If interrupted from transmitter
-        // remove characters from queue to send
-        // disable tx interrupt
+    nIRQ_Lock();
+
+    if (USART3->ISR & USART_ISR_RXNE) { // If interrupt was triggered by recieve
+        Queue_Enqueue(recvQueue, (USART3->RDR & 0xFF));
     }
+    if (USART3->ISR & USART_ISR_TXE) { // If interrupted from transmitter
+        if (Queue_Size(sendQueue) >= 1)
+            USART3->TDR = Queue_Pop(sendQueue) & 0xFF;
+        else
+            USART3->CR1 &= ~USART_CR1_TXEIE; // disable TX interrupt
+    }
+
+    nIRQ_Unlock();
 }

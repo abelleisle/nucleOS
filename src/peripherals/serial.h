@@ -27,6 +27,7 @@
 int Serial_Init(uint32_t, int);
 
 int PutChar(char);
+int PutString(char*);
 char GetChar();
 
 #endif //SERIAL_H

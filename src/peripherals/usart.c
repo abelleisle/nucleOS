@@ -66,6 +66,7 @@ int USART_Init(USART_TypeDef *usart,
     //usart->CR2 |= USART_CR2_ABREN; // enable auto baud rate detection
 
     usart->CR1 |= USART_CR1_UE; // enable usart
+    usart->TDR = 0x00;
 
     return 0;
 }
