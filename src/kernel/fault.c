@@ -18,15 +18,18 @@
 
 #include "stdint.h"
 
-void HardFault_Handler(void)
-{
-    // TODO output this value over serial for debugging
-    register long location asm("r0");
-    (void) location;
+#include "peripherals/gpio.h"
 
+//__attribute__((naked))
+void HardFault_Handler()
+{
+    GPIO_Init();
+    GPIO_Mode(GPIOB, 14, OUTPUT);
+    GPIO_SetPin(GPIOB, 14);
+    while(1);
     // loop forever and keep fault value in R0
-    asm volatile(
-        "CPSID  I\t\n"      // disable interrupts
-        "B      .\t\n"      // loop
-    );
+    //__asm volatile (
+    //    "CPSID  I\t\n"      // disable interrupts
+    //    "B      .\t\n"      // loop
+    //);
 }
