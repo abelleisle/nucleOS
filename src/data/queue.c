@@ -22,10 +22,21 @@
 
 #include "stdlib.h"
 
-int Queue_Init(Queue* queue, int capacity)
+struct Queue
 {
+    int first;
+    int last;
+    int size;
+    int capacity;
+    char* buffer;
+};
+
+Queue* Queue_Init(int capacity)
+{
+    Queue *queue = (Queue*)malloc(sizeof(Queue));
+
     // allocate queue data
-    queue->buffer = (uint8_t*)malloc(capacity * sizeof (uint8_t));
+    queue->buffer = (char*)malloc(capacity * sizeof (char));
 
     queue->capacity = capacity;
     queue->size = 0;
@@ -33,23 +44,55 @@ int Queue_Init(Queue* queue, int capacity)
     queue->first = 0;
     queue->last = 0;
 
-
-    return 0;
+    return queue;
 }
 
-int Queue_Enqueue(Queue* queue, uint8_t data)
+QUEUE_STATUS Queue_Enqueue(Queue* queue, char data)
 {
-    return 0;
+    if (queue->size < queue->capacity) {
+        queue->buffer[queue->last] = data;
+        queue->last = (queue->last + 1) % queue->capacity;
+        queue->size++;
+        return QUEUE_OK;
+    } else {
+        return QUEUE_FULL;
+    }
 }
 
-uint8_t Queue_Dequeue(Queue* queue)
+char Queue_Front(Queue* queue)
 {
-    return queue->buffer[queue->first];
+    if (queue->size != 0)
+        return queue->buffer[queue->first];
+    else
+        return 0xFF;
 }
 
-int Queue_Destroy(Queue* queue)
+QUEUE_STATUS Queue_Dequeue(Queue* queue)
+{
+    if (queue->size != 0) {
+        queue->first = (queue->first + 1) % queue->capacity;
+        queue->size--;
+        return QUEUE_OK;
+    } else {
+        return QUEUE_EMPTY;
+    }
+}
+
+char Queue_Pop(Queue* queue)
+{
+    char ret = Queue_Front(queue);
+    Queue_Dequeue(queue);
+    return ret;
+}
+
+QUEUE_STATUS Queue_Destroy(Queue* queue)
 {
     free(queue->buffer);
 
-    return 0;
+    return QUEUE_OK;
+}
+
+int Queue_Size(Queue* queue)
+{
+    return queue->size;
 }

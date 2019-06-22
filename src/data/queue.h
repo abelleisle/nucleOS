@@ -23,18 +23,20 @@
 
 #include "stdint.h"
 
-typedef struct
-{
-    int first;
-    int last;
-    int size;
-    int capacity;
-    uint8_t* buffer;
-} Queue;
+typedef struct Queue Queue;
 
-int Queue_Init(Queue*, int);
-int Queue_Enqueue(Queue*, uint8_t);
-uint8_t Queue_Dequeue(Queue*);
-int Queue_Destroy(Queue*);
+typedef enum {
+    QUEUE_FULL,
+    QUEUE_EMPTY,
+    QUEUE_OK
+} QUEUE_STATUS;
+
+Queue* Queue_Init(int);
+QUEUE_STATUS Queue_Enqueue(Queue*, char);
+QUEUE_STATUS Queue_Dequeue(Queue*);
+char Queue_Front(Queue*);
+char Queue_Pop(Queue*);
+QUEUE_STATUS Queue_Destroy(Queue*);
+int Queue_Size(Queue*);
 
 #endif //QUEUE_H
