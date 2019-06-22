@@ -2,7 +2,7 @@
 
 This is a stub mirror. The full source code for this commit is at:
 
-https://git.bitcicle.com/andy/nucleOS/src/commit/1ebd7e2bca4e2cc72b5aa7b0756c9c1979b8eaa4
+https://git.bitcicle.com/andy/nucleOS/src/commit/25b9719c7884418bb2c03c8ca139badb0ff3adea
 
 To browse or clone the full repository, visit:
 
