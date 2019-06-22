@@ -1,4 +1,4 @@
-# Copyright (C) 2018  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
+# Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
 # Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,8 @@ SC = arm-none-eabi-as
 LC = arm-none-eabi-ld
 OC = arm-none-eabi-objcopy
 
+BOARD = STM32H743xx
+
 DIR_CRT = mkdir -p $(@D)
 
 SRC_DIR = src
@@ -32,15 +34,24 @@ O_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(C_FILES)) \
 
 CPU_FLAGS = -mcpu=cortex-m7
 C_FLAGS = $(CPU_FLAGS) --specs=nosys.specs -Isrc/ -Ilib/ -Ilib/system/ \
-					   -Ilib/cmsis/inc -Llib/cmsis/gcc -L. -DSTM32H743xx \
-		  				-Wall -Werror
+					   -Ilib/cmsis/inc -Llib/cmsis/gcc -L. -D$(BOARD) \
+		  				-Wall -Werror -std=c11
+DEB_FLAGS = -g -DDEBUG
+REL_FLAGS = -O2
+
 S_FLAGS = $(CPU_FLAGS)
 
 ELF = $(OBJ_DIR)/os.elf
 HEX = $(OBJ_DIR)/os.hex
 OUT = $(HEX)
 
-all: $(OUT)
+all: debug
+
+debug: C_FLAGS += $(DEB_FLAGS)
+debug: $(OUT)
+
+release: C_FLAGS += $(REL_FLAGS)
+release: $(OUT)
 
 $(OUT): $(O_FILES)
 	$(CC) $(C_FLAGS) -o $(ELF) $^ -T lib/ld/STM32H743ZITx_FLASH.ld
@@ -48,16 +59,15 @@ $(OUT): $(O_FILES)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(DIR_CRT)
-	$(CC) $(C_FLAGS) -g -c $< -o $@
+	$(CC) $(C_FLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.s.o: $(SRC_DIR)/%.s
 	@$(DIR_CRT)
-	$(SC) $(S_FLAGS) -g -c $< -o $@
+	$(SC) $(S_FLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR)/*
 
-debug: upload
 upload:
 	@echo "Starting openOCD"
 	@openocd -f board/st_nucleo_h743zi.cfg &
