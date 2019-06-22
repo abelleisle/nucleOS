@@ -31,10 +31,13 @@ void Clock_Init(void)
 
 /**
  * Accuracy of 1ms.
+ * Trigger task switch every 8ms
  */
 void SysTick_Handler(void)
 {
     clock_ticks++;
+    if (!(clock_ticks & 511))
+        SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
 
 void Clock_Delay(uint32_t delay)
