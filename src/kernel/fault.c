@@ -17,15 +17,34 @@
  */
 
 #include "stdint.h"
+#include "stdlib.h"
 
 #include "peripherals/gpio.h"
+#include "peripherals/serial.h"
 
-//__attribute__((naked))
+__attribute__((naked))
 void HardFault_Handler()
 {
+    __asm("CPSID I");
+
+    uint32_t addr;
+
+    __asm
+        ("mov %0, r0"
+         : "=r" (addr)
+        );
+
+    // light up the red LED on the board
     GPIO_Init();
     GPIO_Mode(GPIOB, 14, OUTPUT);
     GPIO_SetPin(GPIOB, 14);
+
+    __asm
+        ("mov r0, %0"
+         :: "r" (addr)
+        );
+
+
     while(1);
     // loop forever and keep fault value in R0
     //__asm volatile (

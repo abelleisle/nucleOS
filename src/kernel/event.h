@@ -21,19 +21,25 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#include "stdint.h"
+
 typedef enum
 {
-    NSIGNAL_TASK_INIT = 0,
-    NSIGNAL_TASK_KILL = 1,
-
+    NSIGNAL_TASK_INIT,
+    NSIGNAL_TASK_KILL,
+    NSIGNAL_TASK_EXIT,
+    NSIGNAL_TASK_IDLE,
+    NSIGNAL_TASK_RUNNING,
 } nSignal;
 
-typedef uint8_t nParam;
+typedef uint16_t nParam;
 
 typedef struct
 {
     nSignal sig;
     nParam par;
 } nEvent;
+
+nEvent nEvent_Create(nSignal, nParam);
 
 #endif //EVENT_H

@@ -23,105 +23,99 @@
 #include "stdlib.h"
 
 // KERNEL
-#include "irq.h"
+#include "kernel/irq.h"
+#include "kernel/event.h"
+#include "kernel/clock.h"
+
 #include "peripherals/gpio.h"
+#include "peripherals/serial.h"
 
-//#define MAX_TASKS 8
-//
-//static uint32_t _nTask_currentPriority = (uint32_t)0xFF;
-//static uint32_t _nTask_readSet = (uint32_t)0;
-//
-//typedef struct {
-//    nTask task;     // The task that will actually be running
-//    nEvent *queue;  // 
-//    uint32_t end;   //
-//    uint32_t head;  //
-//    uint32_t tail;
-//    uint32_t used;
-//    uint32_t mask;
-//} nTaskCB;
-//
-//static nTaskCB tasks[MAX_TASKS];
-//
-//void nTask_create(nTask task, uint32_t priority,
-//                nEvent* queue, uint32_t queueLength,
-//                nSignal sig, nParam par)
-//{
-//    nEvent ie; // initialization event
-//    nTaskCB *tcb = &tasks[priority-1];
-//    tcb->task = task;
-//    tcb->queue = queue;
-//    tcb->end = queueLength;
-//    tcb->head = (uint32_t)0;
-//    tcb->tail = (uint32_t)0;
-//    tcb->used = (uint32_t)0;
-//    tcb->mask = (1 << (priority-1));
-//    ie.sig = sig;
-//    ie.par = par;
-//    tcb->task(ie);                                     /* Initialize the task */
-//}
-//
-//void nTask_run(void)
-//{
-//    nTask_start(); // start all ISRs
-//
-//    nIRQ_Lock();
-//    _nTask_currentPriority = 0; // set idle loop priority
-//    _nTask_schedule();
-//    nIRQ_Unlock();
-//
-//    while (1) {
-//        nTask_onIdle();
-//        _nTask_schedule();
-//    }
-//}
-//
-//void _nTask_schedule(void)
-//{
-//    static uint8_t const log2Lkup[] = {
-//        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
-//        5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-//        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-//        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-//        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-//        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-//        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-//        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-//        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-//    };
-//    uint32_t pin = _nTask_currentPriority;               /* Internal priority */
-//    uint32_t p;                                               /* new priority */
-//
-//    while ((p = log2Lkup[_nTask_readSet]) > pin) {
-//        nTaskCB *tcb = &tasks[p -1];
-//
-//        nEvent e = tcb->queue[tcb->tail];
-//        if ((++tcb->tail) == tcb->end)
-//            tcb->tail = 0;
-//
-//        if ((--tcb->used) == 0)
-//            _nTask_readSet &= ~tcb->mask;
-//
-//        _nTask_currentPriority = p;
-//        nIRQ_Unlock();
-//        
-//        (*tcb->task)(e);
-//
-//        nIRQ_Lock();
-//    }
-//    _nTask_currentPriority = pin;
-//}
+nTask * volatile nTask_Current;
+nTask * volatile nTask_Next;
 
-// signal
-//__attribute__ ((naked))
-void PendSV_Handler(void)
+nTask *nTask_Threads[32 + 1]; 
+uint8_t nTask_ThreadNum = 0;
+uint8_t nTask_ThreadIDX = 0;
+
+nTask* nTask_Start(nTaskHandler handler, nStack stackSize)
 {
-    GPIO_TogglePin(GPIOB, 0);
+    nTask* t = (nTask*)malloc(sizeof(nTask));
+    t->stack = (void*)malloc(stackSize);
+
+    uint32_t* sp = (uint32_t*)((((uint32_t)t->stack + stackSize) / 8) * 8); // align
+    uint32_t* stk_limit;
+
+    /* xPSR */ *(--sp) = (1U << 24);
+    /*  PC  */ *(--sp) = (uint32_t)handler;
+    /*  LR  */ *(--sp) = 0xEU;
+    /*  R12 */ *(--sp) = 0xCU;
+    /*  R3  */ *(--sp) = 0x3U;
+    /*  R2  */ *(--sp) = 0x2U;
+    /*  R1  */ *(--sp) = 0x1U;
+    /*  R0  */ *(--sp) = 0x0U;
+
+    /* Registers R4-R11 */
+    /*  R11 */ *(--sp) = 0xBU;
+    /*  R10 */ *(--sp) = 0xAU;
+    /*  R9  */ *(--sp) = 0x9U;
+    /*  R8  */ *(--sp) = 0x8U;
+    /*  R7  */ *(--sp) = 0x7U;
+    /*  R6  */ *(--sp) = 0x6U;
+    /*  R5  */ *(--sp) = 0x5U;
+    /*  R4  */ *(--sp) = 0x4U;
+
+    t->sp = sp;
+
+    stk_limit = (uint32_t*)(((((uint32_t)t->stack - 1U) / 8) + 1U) * 8);
+
+    for (sp = sp - 1U; sp >= stk_limit; --sp)
+        *(sp) = 0xDEADBEEFU;
+
+    if (nTask_ThreadNum < (sizeof(nTask_Threads)/sizeof(nTask_Threads[0])))
+        nTask_Threads[nTask_ThreadNum++] = t;
+        
+
+    return t;
+}
+
+void nTask_Begin()
+{
+    nIRQ_Lock();
+    nTask_Schedule();
+    nIRQ_Unlock();
+}
+
+void nTask_Schedule(void)
+{
+    nTask_ThreadIDX = ((nTask_ThreadIDX + 1) % nTask_ThreadNum);
+    nTask_Next = nTask_Threads[nTask_ThreadIDX];
+
+    if (nTask_Next != nTask_Current)
+        SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk; // Switch tasks (PendSV)
+}
+
+
+__attribute__((naked))
+void PendSV_Handler(void) {
+
+__asm("     CPSID    I;");
+
+/* Are we currently in a task or not? */
+__asm("     MOV      r1, %0;" :: "r" (nTask_Current->sp));
+__asm("     CBZ      r1, PendSV_restore;"); // if not load new task
+
+/* Store old task */
+__asm("     PUSH     {r4-r11};");
+__asm("     MOV      %0, sp;" : "=r" (nTask_Current->sp));
+
+/* Switch to new task */
+__asm(" PendSV_restore:;");
+
+nTask_Current = nTask_Next;
+
+__asm("     MOV      sp, %0;" :: "r" (nTask_Next->sp));
+__asm("     POP      {r4-r11};");
+
+__asm("     CPSIE    I;");
+__asm("     BX       lr;");
 }

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define QUEUE_SIZE 16
+#define QUEUE_SIZE 64
 
 // C LIBS
 #include "stdlib.h"
@@ -83,8 +83,9 @@ void USART3_IRQHandler()
     if (USART3->ISR & USART_ISR_TXE) { // If interrupted from transmitter
         if (Queue_Size(sendQueue) >= 1)
             USART3->TDR = Queue_Pop(sendQueue) & 0xFF;
-        else
-            USART3->CR1 &= ~USART_CR1_TXEIE; // disable TX interrupt
+
+        if (Queue_Size(sendQueue) == 0)     // Disable tx interrupts if there
+            USART3->CR1 &= ~USART_CR1_TXEIE;//  are no more characters to send
     }
 
     nIRQ_Unlock();

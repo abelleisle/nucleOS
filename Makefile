@@ -18,7 +18,6 @@ CC = arm-none-eabi-gcc
 SC = arm-none-eabi-as
 LC = arm-none-eabi-ld
 OC = arm-none-eabi-objcopy
-
 BOARD = STM32H743xx
 
 DIR_CRT = mkdir -p $(@D)
@@ -32,12 +31,12 @@ OBJ_DIR = out
 O_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(C_FILES)) \
 		  $(patsubst $(SRC_DIR)/%.s, $(OBJ_DIR)/%.s.o, $(S_FILES))
 
-CPU_FLAGS = -mcpu=cortex-m7
+CPU_FLAGS = -mthumb -mcpu=cortex-m7
 C_FLAGS = $(CPU_FLAGS) --specs=nosys.specs -Isrc/ -Ilib/ -Ilib/system/ \
 					   -Ilib/cmsis/inc -Llib/cmsis/gcc -L. -D$(BOARD) \
-		  				-Wall -Werror -std=c11
-DEB_FLAGS = -g -DDEBUG
-REL_FLAGS = -O2
+		  				-Wall -Werror -std=c11 -mfloat-abi=soft
+DEB_FLAGS = -g -DDEBUG -Os
+REL_FLAGS = -Os
 
 S_FLAGS = $(CPU_FLAGS)
 
@@ -67,6 +66,9 @@ $(OBJ_DIR)/%.s.o: $(SRC_DIR)/%.s
 
 clean:
 	rm -rf $(OBJ_DIR)/*
+
+openocd:
+	@openocd -f board/st_nucleo_h743zi.cfg
 
 upload:
 	@echo "Starting openOCD"

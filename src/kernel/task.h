@@ -28,24 +28,20 @@
 // KERNEL
 #include "event.h"
 
-typedef void (*nTask)(nEvent e);
+//typedef void (*nTask)(nEvent e);
 
-/**************************
- *  PLATFORM INDEPENDENT  *
- **************************/
-//void nTask_init(void);
-//void nTask_create(nTask task, uint32_t priority,
-//                nEvent* queue, uint32_t queueLength,
-//                nSignal sig, nParam par);
-//
-//void nTask_run(void);
-//
-//void _nTask_schedule(void);
+typedef uint8_t nPID;
+typedef uint32_t nStack;
 
-/******************
- *  USER DEFINED  *
- ******************/
-//void nTask_start(void);
-//void nTask_onIdle(void);
-//void nTask_exit(void);
+typedef void (*nTaskHandler)(void);
+
+typedef struct {
+    void *sp;                /**< The top of the process stack. */
+    void *stack;                       /**< The processes stack. */
+} nTask;
+
+nTask* nTask_Start(nTaskHandler, nStack);
+void nTask_Schedule(void);
+void nTask_Begin();
+
 #endif // TASK_H
