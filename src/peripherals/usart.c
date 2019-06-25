@@ -56,16 +56,15 @@ int USART_Init(USART_TypeDef *usart,
 
     if (usart == USART3)
         RCC->APB1LENR |= RCC_APB1LENR_USART3EN;
-    //RCC->APB1LLPENR |= RCC_APB1LENR_USART3EN; // low power mode
+
     usart->BRR = SystemCoreClock/baud;
-    //usart->BRR = SystemD2Clock/9600U;
-    //usart->BRR = 96000000U/9600U;
 
     usart->CR1 |= (USART_CR1_TE | USART_CR1_RE); // enable rx and tx
 
     //usart->CR2 |= USART_CR2_ABREN; // enable auto baud rate detection
 
     usart->CR1 |= USART_CR1_UE; // enable usart
+    usart->TDR = 0x00;
 
     return 0;
 }

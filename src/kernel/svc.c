@@ -1,4 +1,6 @@
 /*
+ * @file svc.
+ *
  * Copyright (C) 2019  Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  * Author: Belle-Isle, Andrew <drumsetmonkey@gmail.com>
  *
@@ -16,26 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOCK_H
-#define CLOCK_H
+#include "stdint.h"
 
-#include "stm32h743xx.h"
-
-typedef uint32_t nTime;
-
-/**
- * Initialize the System Tick interrupt for clock ticks
- */
-void nClock_Init(void);
-
-/**
- * Delay current execution for a certain number of milliseconds.
- * NOTE: This function will be running for however many ms are passed
- *  into this function.
- * @param delay How many milliseconds to delay the program.
- */
-void nClock_Delay(uint32_t delay);
-
-nTime nClock_Ticks(void);
-
-#endif // CLOCK_H
+void SVC_Handler(void)
+{
+    // TODO
+}

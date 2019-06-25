@@ -22,16 +22,26 @@
 #ifndef TASK_H
 #define TASK_H
 
-// STD
+// C LIBS
 #include "stdint.h"
 
 // KERNEL
 #include "event.h"
 
-typedef void (*nTask)(nEvent e);
+//typedef void (*nTask)(nEvent e);
 
-void nTask_Init(nTask task, uint32_t priority,
-                nEvent* queue, uint32_t queueLength,
-                nSignal sig, nParam par);
+typedef uint8_t nPID;
+typedef uint32_t nStack;
+
+typedef void (*nTaskHandler)(void);
+
+typedef struct {
+    void *sp;                /**< The top of the process stack. */
+    void *stack;                       /**< The processes stack. */
+} nTask;
+
+nTask* nTask_Start(nTaskHandler, nStack);
+void nTask_Schedule(void);
+void nTask_Begin();
 
 #endif // TASK_H

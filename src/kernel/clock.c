@@ -16,29 +16,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// HEADER
 #include "clock.h"
 
-// The number of clock ticks that have been run since the start of the OS.
-volatile uint32_t clock_ticks = 0;
+// KERNEL
+#include "kernel/irq.h"
+#include "kernel/task.h"
+//#include "kernel/miros.h"
 
-void Clock_Init(void)
+// The number of clock ticks that have been run since the start of the OS.
+volatile nTime clock_ticks = 0;
+
+void nClock_Init(void)
 {
     // Set the number of ticks to skip for the System Tick IRQ by taking
     //  HCLK (system clock) and dividing it by the number of times per second
     //  this should trigger, and subtract one.
     SysTick_Config((SystemCoreClock/1000)-1);
+    NVIC_SetPriority(SysTick_IRQn, 0U);
+    NVIC_SetPriority(PendSV_IRQn, 0xE0U);
 }
 
 /**
  * Accuracy of 1ms.
+ * Trigger task switch every 8ms
  */
 void SysTick_Handler(void)
 {
-    clock_ticks++;
+    ++clock_ticks;
+    if (!(clock_ticks & 7)) {
+        nIRQ_Lock();
+        nTask_Schedule();
+        //OS_sched();
+        nIRQ_Unlock();
+    }
 }
 
-void Clock_Delay(uint32_t delay)
+void nClock_Delay(uint32_t delay)
 {
     uint32_t expected = clock_ticks + delay;
     while(clock_ticks < expected); // hang here until delay is done
+}
+
+nTime nClock_Ticks(void)
+{
+    return clock_ticks;
 }
