@@ -39,6 +39,8 @@
 
 #include "data/queue.h"
 
+#include "fs/fat/fat.h"
+
 
 void flash1_task(void);
 void flash2_task(void);
