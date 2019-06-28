@@ -25,7 +25,7 @@
 //#include "kernel/miros.h"
 
 // The number of clock ticks that have been run since the start of the OS.
-volatile nTime clock_ticks = 0;
+volatile nTime clockTicks = 0;
 
 void nClock_Init(void)
 {
@@ -43,8 +43,8 @@ void nClock_Init(void)
  */
 void SysTick_Handler(void)
 {
-    ++clock_ticks;
-    if (!(clock_ticks & 7)) {
+    ++clockTicks;
+    if (!(clockTicks & 7)) {
         nIRQ_Lock();
         nTask_Schedule();
         //OS_sched();
@@ -54,11 +54,11 @@ void SysTick_Handler(void)
 
 void nClock_Delay(uint32_t delay)
 {
-    uint32_t expected = clock_ticks + delay;
-    while(clock_ticks < expected); // hang here until delay is done
+    uint32_t expected = clockTicks + delay;
+    while(clockTicks < expected); // hang here until delay is done
 }
 
 nTime nClock_Ticks(void)
 {
-    return clock_ticks;
+    return clockTicks;
 }
