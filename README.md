@@ -6,7 +6,7 @@ nucleOS is my rendition of an RTOS for the STM32 Nucleo development boards.
 This OS is being developed on an STM32-Nucleo H743ZI
 
 ## Features ##
-* Real-time multitasking
+* Real-time multitasking using round robin scheduling
 * Serial over ST-Link USB
 * HAL Drivers
   * USART
@@ -16,7 +16,8 @@ This OS is being developed on an STM32-Nucleo H743ZI
 * Very Lightweight
 
 ## Planned Features ##
-* SD Card program loading
+* Custom NucleOS toolchain and custom implementations of system calls
+* SD Card program loading using FAT **(In progress)**
 * Ability to load programs using ELF format
 * I2C Hal driver
 * TFT-RGB display driver
