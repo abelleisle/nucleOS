@@ -1,4 +1,3 @@
-.intel_syntax
 section .text
 
 global vbe_get_mode

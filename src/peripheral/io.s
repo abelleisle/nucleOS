@@ -1,4 +1,3 @@
-.intel_syntax
 global outb
 
 ; outb - Send byte to I/O port
