@@ -1,21 +1,25 @@
-INCS = src/
+CROSS = toolchain/i686-elf/bin/i686-elf-
+CC = $(CROSS)gcc
+AS = nasm
+LD = $(CROSS)ld
+
+INCS = -Isrc/ -L./toolchain/i686-elf/lib/gcc/i686-elf/8.2.0
 OBJECTS = src/init/loader.o src/kernel/kmain.o \
 		  src/peripheral/framebuffer/framebuffer.o \
 		  src/peripheral/framebuffer/framebuffer.s.o \
 		  src/peripheral/io.s.o
-CC = gcc
-CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c -I$(INCS)
-LDFLAGS = -T libs/ld/link.ld -melf_i386
-AS = nasm
-ASFLAGS = -f elf
+CFLAGS = -nostdlib -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c $(INCS)
+
+LDFLAGS = -T libs/ld/link.ld -nostdlib -lgcc $(INCS)
+
+ASFLAGS = -f elf32
 
 OUT = iso/boot/kernel.elf
 
 all: $(OUT)
 
 $(OUT): $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o $(OUT)
+	$(LD) $(LDFLAGS) $(OBJECTS) -o $(OUT)
 
 os.iso: $(OUT)
 	xorrisofs -R                                \

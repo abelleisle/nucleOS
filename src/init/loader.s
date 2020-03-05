@@ -50,7 +50,6 @@ global _loader:function (_loader.end - _loader)
 _loader:
 	cli
 	cld
-
     ; Point to the top of the stack since stack grows downwards in x86
     ;   based systems
 	mov esp, __stack_top

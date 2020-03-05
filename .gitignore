@@ -1,1 +1,3 @@
-out/*
+*/out/*
+*/build/*
+toolchain/i686-elf
