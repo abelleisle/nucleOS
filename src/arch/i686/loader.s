@@ -13,20 +13,20 @@ multiboot_checksum      equ -(MULTIBOOT_MAGIC + multiboot_flags)
 ; Tell multiboot that this is a kernel
 section .multiboot
 align 4
-	dd MULTIBOOT_MAGIC
-	dd multiboot_flags
-	dd multiboot_checksum
-	
-	dd 0x00000000
-	dd 0x00000000
-	dd 0x00000000
-	dd 0x00000000
-	dd 0x00000000
+    dd MULTIBOOT_MAGIC
+    dd multiboot_flags
+    dd multiboot_checksum
+    
+    dd 0x00000000
+    dd 0x00000000
+    dd 0x00000000
+    dd 0x00000000
+    dd 0x00000000
 
-	dd 0x00000000
-	dd 800
-	dd 600
-	dd 32
+    dd 0x00000000
+    dd 800
+    dd 600
+    dd 32
  
 ;------------------;
 ;-  KERNEL STACK  -;
@@ -48,19 +48,19 @@ __stack_top:
 section .text
 global _loader:function (_loader.end - _loader)
 _loader:
-	cli
-	cld
+    cli
+    cld
     ; Point to the top of the stack since stack grows downwards in x86
     ;   based systems
-	mov esp, __stack_top
+    mov esp, __stack_top
  
-	push eax ; Push the multiboot magic
-	push ebx ; Push the multiboot header adress.
-	
-	extern kmain
-	call kmain ; Enter the kernel main
+    push eax ; Push the multiboot magic
+    push ebx ; Push the multiboot header adress.
+    
+    extern kmain
+    call kmain ; Enter the kernel main
 
-	cli
-.hang:	hlt
-	jmp .hang
+    cli
+.hang:  hlt
+    jmp .hang
 .end:
