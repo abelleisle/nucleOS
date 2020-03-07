@@ -1,22 +1,35 @@
+ARCH = i686
+ARCHDIR = src/arch/$(ARCH)
+include $(ARCHDIR)/make.config
+
 CROSS = toolchain/i686-elf/bin/i686-elf-
 CC = $(CROSS)gcc
 AS = nasm
 LD = $(CROSS)ld
 
+KERNEL_OBJECTS = $(KERNEL_ARCH_OBJS)                        \
+				 src/kernel/kmain.o                         \
+		  		 src/peripheral/framebuffer/framebuffer.o   \
+		  		 src/peripheral/framebuffer/framebuffer.s.o \
+		  		 src/peripheral/io.s.o
+
+OBJECTS = $(ARCHDIR)/crti.s.o   \
+		  $(ARCHDIR)/crtbegin.o \
+		  $(KERNEL_OBJECTS)     \
+		  $(ARCHDIR)/crtend.o   \
+		  $(ARCHDIR)/crtn.s.o
+
 INCS = -Isrc/ -L./toolchain/i686-elf/lib/gcc/i686-elf/8.2.0
-OBJECTS = src/init/loader.o src/kernel/kmain.o \
-		  src/peripheral/framebuffer/framebuffer.o \
-		  src/peripheral/framebuffer/framebuffer.s.o \
-		  src/peripheral/io.s.o
 CFLAGS = -nostdlib -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c $(INCS)
-
-LDFLAGS = -T libs/ld/link.ld -nostdlib -lgcc $(INCS)
-
 ASFLAGS = -f elf32
+LDFLAGS = -T $(ARCHDIR)/link.ld -nostdlib -lgcc $(INCS)
 
 OUT = iso/boot/kernel.elf
 
 all: $(OUT)
+
+$(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
+	TOBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$TOBJ" $@
 
 $(OUT): $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECTS) -o $(OUT)
