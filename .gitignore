@@ -1,3 +1,6 @@
 */out/*
 */build/*
 toolchain/i686-elf
+*.o
+*.iso
+*.elf

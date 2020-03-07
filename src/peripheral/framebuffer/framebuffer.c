@@ -23,7 +23,8 @@ static void framebuffer_WriteCell(char c)
 {
     char *where;
     where = fb + framebuffer_ToOffset(csr_x, csr_y);
-    *where = c | (fb_attrib << 8);
+    *where = c;
+    *(where+1) = fb_attrib;
 }
 
 void Framebuffer_SetColor(FB_COLOR_t fg, FB_COLOR_t bg)
