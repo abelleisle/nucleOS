@@ -1,29 +1,45 @@
+############
+#  KERNEL  #
+############
+KERNELDIR = src
+include src/make.config
+
+##################
+#  ARCHITECTURE  #
+##################
 ARCH = i686
 ARCHDIR = src/arch/$(ARCH)
 include $(ARCHDIR)/make.config
 
+###############
+#  TOOLCHAIN  #
+###############
 CROSS = toolchain/i686-elf/bin/i686-elf-
 CC = $(CROSS)gcc
 AS = nasm
 LD = $(CROSS)ld
 
-KERNEL_OBJECTS = $(KERNEL_ARCH_OBJS)                        \
-				 src/kernel/kmain.o                         \
-		  		 src/peripheral/framebuffer/framebuffer.o   \
-		  		 src/peripheral/framebuffer/framebuffer.s.o \
-		  		 src/peripheral/io.s.o
-
+###########
+#  FILES  #
+###########
 OBJECTS = $(ARCHDIR)/crti.s.o   \
 		  $(ARCHDIR)/crtbegin.o \
+		  $(KERNEL_ARCH_OBJS)   \
 		  $(KERNEL_OBJECTS)     \
 		  $(ARCHDIR)/crtend.o   \
 		  $(ARCHDIR)/crtn.s.o
 
+###########
+#  FLAGS  #
+###########
 INCS = -Isrc/ -L./toolchain/i686-elf/lib/gcc/i686-elf/8.2.0
 CFLAGS = -nostdlib -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c $(INCS)
 ASFLAGS = -f elf32
 LDFLAGS = -T $(ARCHDIR)/link.ld -nostdlib -lgcc $(INCS)
 
+###########
+#  RULES  #
+###########
 OUT = iso/boot/kernel.elf
 
 all: $(OUT)
