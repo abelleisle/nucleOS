@@ -1,3 +1,5 @@
+--gcc-toolchain=toolchain/i686-elf/bin/i686-elf-gcc
+
 %c -std=c11
 
 -Isrc/

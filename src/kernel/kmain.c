@@ -25,6 +25,8 @@ void findPrimes(int num);
 
 int kmain(void)
 {
+    GDT_Setup();
+
     Framebuffer_SetColor(FB_COLOR_YELLOW, FB_COLOR_BLACK);
     Framebuffer_PutChar('\n');
     Framebuffer_PutString(opener);

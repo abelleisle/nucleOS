@@ -13,7 +13,7 @@ export PREFIX="$DIR/$TARGET"
 export PATH="$PREFIX/bin:$PATH"
 
 mkdir -p $PREFIX/bin
-mkdir -p build
+mkdir -p $DIR/build
 cd build
 
 # Download binutils
