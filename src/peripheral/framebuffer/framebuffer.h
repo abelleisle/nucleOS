@@ -29,7 +29,9 @@ void Framebuffer_PutChar(unsigned char c);
 /*
  * @warning MUST BE NULL TERMINATED STRING
  */
-void Framebuffer_PutString(char *str);
+void Framebuffer_PutString(const char *str);
+
+void Framebuffer_PutInt(int Number);
 
 /*
  * MODE    RESOLUTION  BITS PER PIXEL  MAXIMUM COLORS

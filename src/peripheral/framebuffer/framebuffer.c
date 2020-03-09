@@ -1,5 +1,7 @@
 #include "framebuffer.h"
 
+#include <stdint.h>
+
 #include <peripheral/io.h>
 
 #define FB_COMMAND_PORT 0x3D4
@@ -8,7 +10,7 @@
 #define FB_HIGH_BYTE_COMMAND 14
 #define FB_LOW_BYTE_COMMAND  15
 
-static char *fb = (char *)(0x000B8000);
+static uint16_t *fb = (uint16_t *)(0x000B8000);
 
 unsigned short screenWidth = 80;
 unsigned short csr_x = 0, csr_y = 0;
@@ -16,15 +18,14 @@ unsigned char fb_attrib = 0x0F;
 
 static unsigned short framebuffer_ToOffset(unsigned short x, unsigned short y)
 {
-    return ((y * screenWidth) + x) * 2;
+    return ((y * screenWidth) + x);
 }
 
 static void framebuffer_WriteCell(char c)
 {
-    char *where;
+    uint16_t *where;
     where = fb + framebuffer_ToOffset(csr_x, csr_y);
-    *where = c;
-    *(where+1) = fb_attrib;
+    *where = c | (fb_attrib << 8);
 }
 
 void Framebuffer_SetColor(FB_COLOR_t fg, FB_COLOR_t bg)
@@ -77,13 +78,50 @@ void Framebuffer_PutChar(unsigned char c)
         csr_y++;
     }
 
+    if (csr_y >= 25) {
+        csr_y = 0;
+    }
+
     Framebuffer_UpdateCursor();
 }
 
-void Framebuffer_PutString(char *str)
+void Framebuffer_PutString(const char *str)
 {
-    for (char *s = str; *s != '\0'; s++)
+    int N = 0;
+    while (str[N])
     {
-        Framebuffer_PutChar(*s);
+        Framebuffer_PutChar(str[N++]);
     }
+}
+
+void Framebuffer_PutInt(int number)
+{
+    int length = 0;
+    int index = 0;
+    int digit = 0;
+    char digits[sizeof(int)*8];
+
+    int copy = number;
+    while (copy) {
+        copy /= 10;
+        length++;
+    }
+
+    index = length;
+    if (length == 0)
+    {
+        digits[0] = 48;
+        digits[1] = 0;
+        goto PrintTime;
+    }
+    digits[index--] = 0;
+
+    while (number) {
+        digit = number % 10;
+        number /= 10;
+        digits[index--] = (digit+48);
+    }
+
+PrintTime:
+    Framebuffer_PutString(digits);
 }
