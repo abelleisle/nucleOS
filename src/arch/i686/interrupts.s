@@ -1,0 +1,112 @@
+%macro INTERRUPT_NAME 1
+dd isr%1
+%endmacro
+
+%macro INTERRUPT_ERR 1
+global isr%1
+isr%1:
+    push %1
+    jmp isr_common
+%endmacro
+
+%macro INTERRUPT_NOERR 1
+global isr%1
+isr%1:
+    push 0
+    push %1
+    jmp isr_common
+%endmacro
+
+%macro INTERRUPT_SYSCALL 1
+global isr%1
+isr%1:
+    push 0
+    push %1
+    jmp isr_common
+%endmacro
+
+extern ISR_Handler
+
+isr_common:
+    cld
+    
+    pushad
+
+    push ds
+    push es
+    push fs
+    push gs
+
+    mov ax, 0x10
+
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    push esp
+
+    call ISR_Handler
+
+    mov esp, eax
+
+    pop gs
+    pop gs
+    pop es
+    pop ds
+
+    popad
+    add esp, 8
+    iret
+
+INTERRUPT_NOERR  0
+INTERRUPT_NOERR  1
+INTERRUPT_NOERR  2
+INTERRUPT_NOERR  3
+INTERRUPT_NOERR  4
+INTERRUPT_NOERR  5
+INTERRUPT_NOERR  6
+INTERRUPT_NOERR  7
+INTERRUPT_ERR    8
+INTERRUPT_NOERR  9
+INTERRUPT_ERR   10
+INTERRUPT_ERR   11
+INTERRUPT_ERR   12
+INTERRUPT_ERR   13
+INTERRUPT_ERR   14
+INTERRUPT_NOERR 15
+INTERRUPT_NOERR 16
+INTERRUPT_NOERR 17
+INTERRUPT_NOERR 18
+INTERRUPT_NOERR 19
+INTERRUPT_NOERR 20
+INTERRUPT_NOERR 21
+INTERRUPT_NOERR 22
+INTERRUPT_NOERR 23
+INTERRUPT_NOERR 24
+INTERRUPT_NOERR 25
+INTERRUPT_NOERR 26
+INTERRUPT_NOERR 27
+INTERRUPT_NOERR 28
+INTERRUPT_NOERR 29
+INTERRUPT_ERR   30
+INTERRUPT_NOERR 31
+
+INTERRUPT_NOERR 32
+INTERRUPT_NOERR 33
+INTERRUPT_NOERR 34
+INTERRUPT_NOERR 35
+INTERRUPT_NOERR 36
+INTERRUPT_NOERR 37
+INTERRUPT_NOERR 38
+INTERRUPT_NOERR 39
+INTERRUPT_NOERR 40
+INTERRUPT_NOERR 41
+INTERRUPT_NOERR 42
+INTERRUPT_NOERR 43
+INTERRUPT_NOERR 44
+INTERRUPT_NOERR 45
+INTERRUPT_NOERR 46
+INTERRUPT_NOERR 47
+
+INTERRUPT_SYSCALL 128

@@ -1,5 +1,6 @@
 #include <peripheral/framebuffer/framebuffer.h>
 #include <arch/i686/gdt.h>
+#include <arch/i686/idt.h>
 
 /**
  * Easter egg?
@@ -26,6 +27,7 @@ void findPrimes(int num);
 int kmain(void)
 {
     GDT_Setup();
+    IDT_Setup();
 
     Framebuffer_SetColor(FB_COLOR_YELLOW, FB_COLOR_BLACK);
     Framebuffer_PutChar('\n');
@@ -33,6 +35,9 @@ int kmain(void)
     Framebuffer_PutString("\n\n");
 
     findPrimes(25);
+
+    asm volatile("int $0x3");
+    asm volatile("int $0x4");
 
     while (1);
 }
