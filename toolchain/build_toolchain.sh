@@ -14,7 +14,7 @@ export PATH="$PREFIX/bin:$PATH"
 
 mkdir -p $PREFIX/bin
 mkdir -p $DIR/build
-cd build
+cd $DIR/build
 
 # Download binutils
 if [ ! -d ./$BU_VER ]; then

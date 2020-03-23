@@ -46,10 +46,13 @@ OUT = iso/boot/kernel.elf
 
 all: $(OUT)
 
+$(CC):
+	./toolchain/build_toolchain.sh
+
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	TOBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$TOBJ" $@
 
-$(OUT): $(OBJECTS)
+$(OUT): $(CC) $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECTS) -o $(OUT)
 
 os.iso: $(OUT)
