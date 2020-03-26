@@ -12,7 +12,8 @@
 
 static uint16_t *fb = (uint16_t *)(0x000B8000);
 
-unsigned short screenWidth = 80;
+const unsigned short screenWidth  = 80;
+const unsigned short screenHeight = 25;
 unsigned short csr_x = 0, csr_y = 0;
 unsigned char fb_attrib = 0x0F;
 
@@ -51,6 +52,14 @@ void Framebuffer_UpdateCursor(void)
     Framebuffer_MoveCursor(csr_x, csr_y);
 }
 
+void Framebuffer_Clear(void)
+{
+    int matrixSize = screenWidth * screenHeight;
+    Framebuffer_MoveCursor(0, 0);
+    for (int p = 0; p < matrixSize; p++)
+        Framebuffer_PutChar(' ');
+}
+
 void Framebuffer_PutChar(unsigned char c)
 {
     if (c == 0x08) {
@@ -73,12 +82,12 @@ void Framebuffer_PutChar(unsigned char c)
     }
 
     /* If we go over the edge of the screen return to the next line */
-    if (csr_x >= 80) {
+    if (csr_x >= screenWidth) {
         csr_x = 0;
         csr_y++;
     }
 
-    if (csr_y >= 25) {
+    if (csr_y >= screenHeight) {
         csr_y = 0;
     }
 

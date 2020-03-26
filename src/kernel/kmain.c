@@ -22,11 +22,21 @@ char opener[] = {0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,
 
 void findPrimes(int num);
 
+#define stringize(x) #x
+#define ARCH(a) stringize(a)
+
 int kmain(void)
 {
     // TODO move to private arch
     GDT_Setup();
     IDT_Setup();
+
+    Framebuffer_Clear();
+
+    Framebuffer_SetColor(FB_COLOR_WHITE, FB_COLOR_BLACK);
+    Framebuffer_PutString("Booting nucleOS ");
+    Framebuffer_PutString(ARCH(__ARCH__));
+    Framebuffer_PutChar('\n');
 
     Framebuffer_SetColor(FB_COLOR_YELLOW, FB_COLOR_BLACK);
     Framebuffer_PutChar('\n');

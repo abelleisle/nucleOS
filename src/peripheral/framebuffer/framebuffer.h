@@ -25,7 +25,10 @@ void Framebuffer_SetColor(FB_COLOR_t fg, FB_COLOR_t bg);
 void Framebuffer_MoveCursor(unsigned short x, unsigned short y);
 void Framebuffer_UpdateCursor(void);
 
+void Framebuffer_Clear(void);
+
 void Framebuffer_PutChar(unsigned char c);
+
 /*
  * @warning MUST BE NULL TERMINATED STRING
  */
