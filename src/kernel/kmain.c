@@ -1,6 +1,4 @@
 #include <peripheral/framebuffer/framebuffer.h>
-#include <arch/i686/gdt.h>
-#include <arch/i686/idt.h>
 
 /**
  * Easter egg?
@@ -26,6 +24,7 @@ void findPrimes(int num);
 
 int kmain(void)
 {
+    // TODO move to private arch
     GDT_Setup();
     IDT_Setup();
 

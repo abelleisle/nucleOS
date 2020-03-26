@@ -2,13 +2,13 @@
 #  KERNEL  #
 ############
 KERNELDIR = src
-include src/make.config
+include $(KERNELDIR)/make.config
 
 ##################
 #  ARCHITECTURE  #
 ##################
 ARCH = i686
-ARCHDIR = src/arch/$(ARCH)
+ARCHDIR = $(KERNELDIR)/arch/$(ARCH)
 include $(ARCHDIR)/make.config
 
 ###############
@@ -23,21 +23,30 @@ LD = $(CROSS)ld
 ###########
 #  FILES  #
 ###########
-OBJECTS = $(ARCHDIR)/crti.s.o   \
-		  $(ARCHDIR)/crtbegin.o \
-		  $(KERNEL_ARCH_OBJS)   \
-		  $(KERNEL_OBJECTS)     \
-		  $(ARCHDIR)/crtend.o   \
-		  $(ARCHDIR)/crtn.s.o
+OBJECTS = $(ARCHDIR)/lib/crti.s.o   \
+		  $(ARCHDIR)/lib/crtbegin.o \
+		  $(KERNEL_ARCH_OBJS)       \
+		  $(KERNEL_OBJECTS)         \
+		  $(ARCHDIR)/lib/crtend.o   \
+		  $(ARCHDIR)/lib/crtn.s.o
 
 ###########
 #  FLAGS  #
 ###########
-INCS = -Isrc/ -Ilibs/pdclib/include -Ilibs/pdclib/platform/nucleOS/include \
-	   -L./toolchain/i686-elf/lib/gcc/i686-elf/8.2.0
-CFLAGS = -ggdb -O3 -nostdlib -nostartfiles -nodefaultlibs -fstack-protector -Wall -Wextra -Werror -c $(INCS)
+MACROS = -D__ARCH__=$(ARCH)
+
+INCS =  -I$(KERNELDIR)/ \
+		-Ilibs/pdclib/include \
+		-Ilibs/pdclib/platform/nucleOS/include \
+	    -L./toolchain/i686-elf/lib/gcc/i686-elf/8.2.0
+
+CFLAGS = -ggdb -O3 -nostdlib -nostartfiles -nodefaultlibs -fstack-protector \
+		 -Wall -Wextra -Werror $(MACROS) $(INCS) -c 						\
+		 -include $(ARCHDIR)/common.h
+
 ASFLAGS = -f elf32
-LDFLAGS = -T $(ARCHDIR)/link.ld -nostdlib -lgcc $(INCS)
+
+LDFLAGS = -T $(KERNEL_ARCH_LINKER) -nostdlib -lgcc $(INCS)
 
 ###########
 #  RULES  #
@@ -49,7 +58,7 @@ all: $(OUT)
 $(CC):
 	./toolchain/build_toolchain.sh
 
-$(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
+$(ARCHDIR)/lib/crtbegin.o $(ARCHDIR)/lib/crtend.o:
 	TOBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$TOBJ" $@
 
 $(OUT): $(CC) $(OBJECTS)
