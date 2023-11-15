@@ -1,10 +1,27 @@
-/// Build the kernel based on hardware.
-/// We can expose modules using the 'n' prefix. Example: 'nArch' will be the
-///  architecture-specific module of NucleOS.
-///
-/// This makes it easy to enable hardware specific settings.
-/// For example, if we're compiling for x86, the nArch module will be created
-///  with the base file: kernel/arch/x86/x86.zig.
-/// At this point, the kernel can use @import("nArch") to import architecture
-///  dependant code without relying on the zig standard library
-///  (std.zig.crossTarget...)
+const std = @import("std");
+
+/// Generate and build the documents for NucleOS
+pub fn build(b: *std.Build) !void {
+    const target = .{ .cpu_arch = .x86, .os_tag = .linux };
+
+    const kernel = @import("kernel/build.zig").kernel(b, target);
+
+    const optimize = b.standardOptimizeOption(.{});
+    const root_source_file = std.Build.FileSource.relative("./examples/posix_test/main.zig");
+
+    const exe_step = b.step("exe", "Install executable for all targets");
+
+    const exe = b.addExecutable(.{
+        .name = "exe",
+        .target = target,
+        .optimize = optimize,
+        .root_source_file = root_source_file,
+    });
+
+    exe.addModule("kernel", kernel);
+
+    const exe_install = b.addInstallArtifact(exe, .{});
+    exe_step.dependOn(&exe_install.step);
+
+    b.default_step.dependOn(exe_step);
+}

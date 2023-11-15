@@ -1,4 +1,4 @@
-# nucleOS #
+# NucleOS #
 
 ## What is this? ##
 nucleOS is my rendition of an RTOS for the STM32 Nucleo development boards.

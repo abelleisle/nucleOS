@@ -1,1 +1,1 @@
-pub fn init() void {}
+pub const MagicNumber: usize = 0x234234;

@@ -1,0 +1,163 @@
+//!zig-autodoc-guide: README.md
+//!zig-autodoc-guide: docs/guides/NucleOS.md
+
+/// Build the kernel based on hardware.
+/// We can expose modules using the 'n' prefix. Example: 'nArch' will be the
+///  architecture-specific module of NucleOS.
+///
+/// This makes it easy to enable hardware specific settings.
+/// For example, if we're compiling for x86, the nArch module will be created
+///  with the base file: kernel/arch/x86/x86.zig.
+/// At this point, the kernel can use @import("nArch") to import architecture
+///  dependant code without relying on the zig standard library
+///  (std.zig.crossTarget...)
+const std = @import("std");
+
+fn root() []const u8 {
+    return comptime (std.fs.path.dirname(@src().file) orelse ".");
+}
+
+const build_root = root();
+
+//////////////////////
+//  NUCLEOS OBJECT  //
+//////////////////////
+
+/// This file will act as a struct, which will allow us to construct the
+/// build programatically.
+const NucleOS = @This();
+
+b: *std.Build,
+self: *std.Build.Dependency,
+
+/// Creates a new instance of the NucleOS build tool.
+///
+/// This is used to keep track of the build context across multiple calls
+/// and can be used to "smartly" build the operating system.
+pub fn init(b: *std.Build, dependency_name: []const u8) *NucleOS {
+    const nOS = b.allocator.create(NucleOS) catch @panic("OOO (Out-of-memory)!");
+    nOS.* = NucleOS{
+        .b = b,
+        .self = b.dependency(dependency_name, .{}),
+    };
+    return nOS;
+}
+
+/////////////
+//  TYPES  //
+/////////////
+
+pub const Kernel = struct {
+    pub const Modules = struct {
+        kernel: *std.build.Module,
+        arch: *std.build.Module,
+    };
+
+    nOS: *NucleOS,
+    host_build: *std.Build,
+    artifact: *std.Build.Step.Compile,
+
+    target: Cpu,
+
+    modules: Modules,
+};
+
+pub const Bootloader = struct {};
+
+pub const Cpu = struct {
+    name: []const u8,
+    kernel_src: []const u8,
+    target: std.zig.CrossTarget,
+};
+
+pub const Architectures = struct {
+    pub const x86 = Cpu{
+        .name = "AVR5",
+        .kernel_src = build_root ++ "kernel/arch/x86/x86.zig",
+        .target = std.zig.CrossTarget{
+            .cpu_arch = .x86,
+            .os_tag = .freestanding,
+            .abi = .eabi,
+        },
+    };
+};
+
+pub const Architecture = union(enum) {
+    x86,
+    custom: *const Cpu,
+
+    pub fn getCpu(arch: Architecture) *const Cpu {
+        return switch (@as(std.meta.Tag(Architecture), arch)) {
+            inline else => |tag| &@field(Architectures, @tagName(tag)),
+            .custom => arch.custom,
+        };
+    }
+};
+
+/////////////////
+//  FUNCTIONS  //
+/////////////////
+
+pub const KernelOptions = struct {
+    name: []const u8,
+
+    optimize: std.builtin.OptimizeMode = .ReleaseSmall,
+};
+
+pub fn addKernel(self: *NucleOS, host_build: *std.Build, architecture: Architecture, options: KernelOptions) *Kernel {
+    const nBuild = self.self.builder;
+
+    const k: *Kernel = host_build.allocator.create(Kernel) catch @panic("OOO (Out-of-memory)!");
+    // zig fmt: off
+    k.* = Kernel {
+        .nOS = self,
+        .host_build = host_build,
+        .artifact = host_build.addExecutable(.{
+            .name = "NucleOS",
+            .optimize = options.optimize,
+            .target = architecture.getCpu().target,
+            .linkage = .static,
+            .root_source_file = .{ .cwd_relative = nBuild.pathFromRoot("kernel/start.zig") },
+        }),
+
+        .target = architecture.getCpu().*,
+
+        .modules = .{
+            .kernel = nBuild.createModule(.{
+                .source_file = .{ .cwd_relative = nBuild.pathFromRoot("kernel/kernel.zig") },
+            }),
+            .arch = undefined,
+        }
+
+    };
+    // zig fmt: on
+
+    k.modules.arch = self.self.builder.createModule(.{
+        .source_file = .{ .path = self.self.builder.pathFromRoot(architecture.getCpu().kernel_src) },
+    });
+    k.modules.kernel.dependencies.put("nArch", k.modules.arch) catch @panic("OOO (Out-of-memory)!");
+
+    k.artifact.addModule("NucleOS", k.modules.kernel);
+
+    return k;
+}
+
+pub fn installKernel(self: *NucleOS, host_build: *std.build, kernel: *Kernel) void {
+    _ = self;
+    host_build.installArtifact(kernel.artifact);
+}
+
+/// Generate and build the documents for NucleOS
+pub fn build(b: *std.Build) !void {
+    const build_test = b.addTest(.{
+        .root_source_file = .{ .path = "build.zig" },
+    });
+
+    const install_docs = b.addInstallDirectory(.{
+        .source_dir = build_test.getEmittedDocs(),
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+    });
+
+    b.getInstallStep().dependOn(&install_docs.step);
+}
