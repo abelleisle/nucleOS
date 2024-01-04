@@ -2,7 +2,14 @@ const std = @import("std");
 
 /// Generate and build the documents for NucleOS
 pub fn build(b: *std.Build) !void {
-    const target = .{ .cpu_arch = .x86, .os_tag = .linux };
+    // zig fmt: off
+    const target = std.zig.CrossTarget{
+        .cpu_arch = .thumb,
+        .cpu_model = .{ .explicit = &std.Target.arm.cpu.cortex_m4 },
+        .os_tag = .freestanding,
+        .abi = .eabi
+    };
+    // zig fmt: on
 
     const kernel = @import("kernel/build.zig").kernel(b, target);
 

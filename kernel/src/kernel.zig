@@ -1,4 +1,5 @@
-const arch = @import("arch");
+const arch = @import("arch.zig");
+pub const Task = @import("task.zig");
 
 pub fn init() usize {
     return arch.MagicNumber;
