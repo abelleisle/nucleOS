@@ -59,8 +59,8 @@ comptime {
             \\// Old thread should be put back in run queue before this is called
             \\switch_to_thread:
             \\    // Save the current thread's state
-            // \\    push    {lr}     // Push stack pointer and link register
-            // \\    push    {sp}
+            \\    push    {lr}     // Push stack pointer and link register
+            \\    push    {sp}
             \\    mrs     r12, cpsr   // Get the current program state register
             \\    push    {r0-r12}    // Save all general purpose registers and program state
             \\    str     sp, [r0]    // Store the stack pointer into the saved_state field of the current process
@@ -71,7 +71,9 @@ comptime {
             \\    pop     {r0-r12}    // restore the general purpose registers
             \\    msr     cpsr_c, r12   // Restore the new thread's program status register
             // \\    pop     {lr, pc}    // we have no idea what lr should be, so just give it a garbage value. pc gets the stored lr so this function returns to there
-            \\    bx      lr
+            \\    pop     {lr}    // we have no idea what lr should be, so just give it a garbage value. pc gets the stored lr so this function returns to there
+            \\    pop     {pc}    // we have no idea what lr should be, so just give it a garbage value. pc gets the stored lr so this function returns to there
+            // \\    bx      lr
         );
     } else if (builtin.cpu.arch.isARM()) {
         asm (
@@ -82,8 +84,8 @@ comptime {
             \\// Old thread should be put back in run queue before this is called
             \\switch_to_thread:
             \\    // Save the current thread's state
-            // \\    push    {lr}     // Push stack pointer and link register
-            // \\    push    {sp}
+            \\    push    {lr}     // Push stack pointer and link register
+            \\    push    {sp}
             \\    mrs     r12, cpsr   // Get the current program state register
             \\    push    {r0-r12}    // Save all general purpose registers and program state
             \\    str     sp, [r0]    // Store the stack pointer into the saved_state field of the current process
@@ -94,7 +96,9 @@ comptime {
             \\    pop     {r0-r12}    // restore the general purpose registers
             \\    msr     cpsr_c, r12   // Restore the new thread's program status register
             // \\    pop     {lr, pc}    // we have no idea what lr should be, so just give it a garbage value. pc gets the stored lr so this function returns to there
-            \\    bx      lr
+            \\    pop     {lr}    // we have no idea what lr should be, so just give it a garbage value. pc gets the stored lr so this function returns to there
+            \\    pop     {pc}    // we have no idea what lr should be, so just give it a garbage value. pc gets the stored lr so this function returns to there
+            // \\    bx      lr
         );
     } else {
         @compileError("`switch_to_thread` not defined for this ISA");
