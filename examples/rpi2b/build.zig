@@ -2,6 +2,7 @@ const std = @import("std");
 
 const Target = .{
     .cpu_arch = std.Target.Cpu.Arch.arm,
+    // .cpu_arch = std.Target.Cpu.Arch.thumb,
     .cpu_model = std.zig.CrossTarget.CpuModel{ .explicit = &std.Target.arm.cpu.cortex_a7 },
     .cpu_features_add = std.Target.arm.cpu.cortex_a5.features,
     .os_tag = std.Target.Os.Tag.freestanding,

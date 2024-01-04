@@ -2,7 +2,11 @@ const arch = @import("arch.zig");
 pub const Task = @import("task.zig");
 
 pub fn init() !void {
-    // return arch.MagicNumber;
+    Task.init();
+}
+
+pub fn start() void {
+    while (true) {}
 }
 
 pub fn log(msg: []const u8) usize {
