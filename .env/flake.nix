@@ -3,7 +3,7 @@
 
   inputs =
     {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
       flake-utils.url = "github:numtide/flake-utils";
     };
 
@@ -26,6 +26,7 @@
             ];
             shellHook = ''
               $SHELL
+              exit
             '';
           };
         }
