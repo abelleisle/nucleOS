@@ -1,39 +1,38 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) !void {
-    const want_gdb = b.option(bool, "gdb", "Build for using gdb with qemu") orelse false;
-    const want_pty = b.option(bool, "pty", "Create a separate TTY path") orelse false;
-    const want_display = b.option(bool, "display", "Use display for qemu") orelse false;
+const Target = .{
+    .cpu_arch = std.Target.Cpu.Arch.arm,
+    .cpu_model = std.zig.CrossTarget.CpuModel{ .explicit = &std.Target.arm.cpu.cortex_a7 },
+    .cpu_features_add = std.Target.arm.cpu.cortex_a5.features,
+    .os_tag = std.Target.Os.Tag.freestanding,
+    .abi = std.Target.Abi.gnueabi,
+};
 
+pub fn build(b: *std.Build, kernel: *std.Build.Module, comptime name: []const u8) !void {
     // const target = b.standardTargetOptions(.{});
-    const target = .{
-        .cpu_arch = std.Target.Cpu.Arch.arm,
-        .cpu_model = std.zig.CrossTarget.CpuModel{ .explicit = &std.Target.arm.cpu.cortex_a7 },
-        .cpu_features_add = std.Target.arm.cpu.cortex_a5.features,
-        .os_tag = std.Target.Os.Tag.freestanding,
-        .abi = std.Target.Abi.gnueabi,
-    };
     const optimize = b.standardOptimizeOption(.{});
 
     const elf = b.addExecutable(.{
-        .name = "rpi-os",
+        .name = name,
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
-        .root_source_file = .{ .path = "src/kernel.zig" },
-        .target = target,
+        .root_source_file = .{ .path = thisDir() ++ "src/main.zig" },
+        .target = Target,
         .optimize = optimize,
     });
-    elf.setLinkerScript(.{ .path = "ld/linker.ld" });
-    elf.addAssemblyFile(.{ .path = "src/boot.S" });
-    b.installArtifact(elf);
+    elf.setLinkerScript(.{ .path = thisDir() ++ "ld/linker.ld" });
+    elf.addAssemblyFile(.{ .path = thisDir() ++ "src/boot.S" });
+    elf.addModule("kernel", kernel);
+    const install_step = b.step(name, "Build rpi-os demo");
+    install_step.dependOn(&b.addInstallArtifact(elf, .{}).step);
 
-    // const run_cmd = b.addRunArtifact(exe);
-    // run_cmd.step.dependOn(b.getInstallStep());
-    // if (b.args) |args| {
-    //     run_cmd.addArgs(args);
-    // }
-    // const run_step = b.step("run", "Run the app");
-    // run_step.dependOn(&run_cmd.step);
+    try qemu(b, elf, name);
+}
+
+fn qemu(b: *std.Build, executable: *std.Build.Step.Compile, comptime name: []const u8) !void {
+    const want_gdb = b.option(bool, "gdb", "Build for using gdb with qemu") orelse false;
+    const want_pty = b.option(bool, "pty", "Create a separate TTY path") orelse false;
+    const want_display = b.option(bool, "display", "Use display for qemu") orelse false;
 
     var qemu_args = std.ArrayList([]const u8).init(b.allocator);
     defer qemu_args.deinit();
@@ -53,23 +52,27 @@ pub fn build(b: *std.Build) !void {
     }
 
     const run_qemu = b.addSystemCommand(try qemu_args.toOwnedSlice());
-    run_qemu.step.dependOn(&elf.step);
+    run_qemu.step.dependOn(&executable.step);
 
     run_qemu.addArgs(&[_][]const u8{
         "-kernel",
-        // elf.getEmittedBin().generated.getPath(),
-        "zig-out/bin/rpi-os",
     });
+    run_qemu.addFileArg(executable.getEmittedBin());
 
-    const qemu = b.step("qemu", "Simulate the OS in qemu");
-    qemu.dependOn(&run_qemu.step);
+    const qemu_step = b.step(name ++ "-qemu", "Simulate the OS in qemu");
+    qemu_step.dependOn(&run_qemu.step);
 
-    const unit_tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/main.zig" },
-        .target = target,
-        .optimize = optimize,
-    });
-    const run_unit_tests = b.addRunArtifact(unit_tests);
-    const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_unit_tests.step);
+    // const optimize = b.standardOptimizeOption(.{});
+    // const unit_tests = b.addTest(.{
+    //     .root_source_file = .{ .path = "src/main.zig" },
+    //     .target = Target,
+    //     .optimize = optimize,
+    // });
+    // const run_unit_tests = b.addRunArtifact(unit_tests);
+    // const test_step = b.step("test", "Run unit tests");
+    // test_step.dependOn(&run_unit_tests.step);
+}
+
+inline fn thisDir() []const u8 {
+    return comptime (std.fs.path.dirname(@src().file) orelse ".") ++ "/";
 }

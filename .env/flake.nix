@@ -1,34 +1,44 @@
 {
-  description = "NucleOS Operating System";
+  description = "NixOS workstation configs and user setup by abelleisle";
 
-  inputs =
-    {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
-      flake-utils.url = "github:numtide/flake-utils";
-    };
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-  outputs = inputs:
-    let
-      inherit (inputs) nixpkgs flake-utils;
-    in
-    flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-          };
-        in rec
-        {
-          devShells.default = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils } @ inputs:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+      in {
+        devShells.default =
+          pkgs.mkShell {
+            buildInputs = with pkgs; [
+              gcc-arm-embedded
+              cmake
+              gnumake
+              openocd
+              qemu
               zig
               zls
             ];
+
             shellHook = ''
-              $SHELL
-              exit
+              echo "Lab node development shell"
+              if [ -x "$(command -v zsh)" ]; then
+                echo "ZSH is installed!"
+                echo "Using ZSH for shell"
+                zsh
+                exit
+              else
+                echo "ZSH is not installed.. Using default nix shell"
+              fi
             '';
           };
-        }
-      );
+      }
+    );
 }

@@ -1,7 +1,6 @@
 const std = @import("std");
 
-pub fn kernel(b: *std.Build, target: std.zig.CrossTarget) *std.Build.Module {
-    _ = target;
+pub fn kernel(b: *std.Build) *std.Build.Module {
     const kernel_module = b.createModule(.{ .source_file = .{ .path = thisDir() ++ "/src/kernel.zig" } });
 
     // if (target.cpu_arch) |arch| {
