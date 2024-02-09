@@ -22,7 +22,7 @@ pub fn build(b: *std.Build, kernel: *std.Build.Module, comptime name: []const u8
         .optimize = optimize,
     });
     elf.setLinkerScript(.{ .path = thisDir() ++ "ld/linker.ld" });
-    elf.addAssemblyFile(.{ .path = thisDir() ++ "src/boot.S" });
+    // elf.addAssemblyFile(.{ .path = thisDir() ++ "src/boot.S" });
     elf.addModule("kernel", kernel);
     const install_step = b.step(name, "Build rpi-os demo");
     install_step.dependOn(&b.addInstallArtifact(elf, .{}).step);

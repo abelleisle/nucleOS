@@ -14,18 +14,20 @@ pub const Context = struct {
     r8: u32,
     r9: u32,
     r10: u32,
-    r11: u32,
-    cpsr: u32,
-    sp: u32,
-    lr: u32,
+    r11: u32, // fp
+    cpsr: u32, // r12
+    sp: u32, // r13
+    lr: u32, // r14
 
     pub fn init(callback: *const fn () void, stack: []u8) *Context {
-        const context_start = @intFromPtr(stack.ptr) + stack.len - @sizeOf(Context);
+        const sp = ((@intFromPtr(stack.ptr) + stack.len) / @alignOf(u32)) * @alignOf(u32);
+        const context_start = ((sp - @sizeOf(Context)) / @alignOf(Context)) * @alignOf(Context);
 
-        var ctx: *Context = @ptrFromInt(context_start);
+        var ctx: *align(@alignOf(Context)) Context = @ptrFromInt(context_start);
 
         const reap = @import("../../../task.zig").reap;
-        const reap_ptr = &reap;
+        const reap_ptr: u32 = @intFromPtr(&reap);
+        const callback_ptr: u32 = @intFromPtr(callback);
 
         ctx.r0 = 0x00000000;
         ctx.r1 = 0x11111111;
@@ -40,14 +42,14 @@ pub const Context = struct {
         ctx.r10 = 0xAAAAAAAA;
         ctx.r11 = 0xBBBBBBBB;
         ctx.cpsr = 0x13 | (8 << 1); // Run in supervisor mode with irqs only
-        ctx.sp = @intFromPtr(reap_ptr);
-        ctx.lr = @intFromPtr(callback);
+        ctx.sp = reap_ptr;
+        ctx.lr = callback_ptr;
 
         return ctx;
     }
 };
 
-extern fn switch_to_thread(old: u32, new: u32) void;
+pub extern fn switch_to_thread(old: u32, new: u32) void;
 
 comptime {
     if (builtin.cpu.arch.isThumb()) {

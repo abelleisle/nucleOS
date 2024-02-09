@@ -1,6 +1,6 @@
 const Arch = @import("arch.zig");
 const Type = @import("type/queue.zig");
-const TaskList = Type.LinkedList(*Task);
+const logging = @import("log.zig");
 
 // zig fmt: off
 pub const Task = struct {
@@ -8,7 +8,6 @@ pub const Task = struct {
     stack  : []const u8,
     pid    : Arch.Task.PID,
     name   : []const u8,
-    node   : TaskList.Node
 };
 
 pub const TaskCallback = *const fn () void;
@@ -25,18 +24,31 @@ pub fn Create(name: []const u8, callback: *const fn () void, stack: []u8) Task {
         .stack = stack,
         .pid = obtainPID(),
         .name = name,
-        .node = .{ .data = undefined },
     };
-    task.node.data = &task;
     // zig fmt: on
 
-    taskList.append(&task.node);
+    if (lastTask) |_| {
+        nextTask = &task;
+    } else {
+        lastTask = &task;
+    }
 
     return task;
 }
 
 pub fn schedule() void {
     Arch.Interrupt.disable();
+
+    if (lastTask) |t| {
+        if (nextTask) |n| {
+            logging.log(.debug, "Scheduling!\n");
+            const old_ptr: u32 = @intFromPtr(t);
+            const new_ptr: u32 = @intFromPtr(n);
+            nextTask = t;
+            lastTask = n;
+            Arch.Task.switch_to_thread(old_ptr, new_ptr);
+        }
+    }
 
     Arch.Interrupt.enable();
 }
@@ -49,8 +61,9 @@ fn obtainPID() Arch.Task.PID {
 }
 
 /// Stored in BSS
-var taskList: TaskList = TaskList{};
 var currentPID: Arch.Task.PID = 1;
+var lastTask: ?*Task = null;
+var nextTask: ?*Task = null;
 
 pub fn init() void {
     currentPID = 0;

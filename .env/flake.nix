@@ -19,6 +19,7 @@
           pkgs.mkShell {
             buildInputs = with pkgs; [
               gcc-arm-embedded
+              gdb
               cmake
               gnumake
               openocd

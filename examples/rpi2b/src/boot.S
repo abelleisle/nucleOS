@@ -25,7 +25,7 @@ _start:
     cmp r4, r9
     blo 1b
 
-    ldr r3, =kernel_main
+    ldr r3, =rpi_main
     blx r3
 
 halt:
