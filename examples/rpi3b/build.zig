@@ -1,10 +1,10 @@
 const std = @import("std");
 
 const Target = .{
-    .cpu_arch = std.Target.Cpu.Arch.arm,
+    .cpu_arch = std.Target.Cpu.Arch.aarch64,
     // .cpu_arch = std.Target.Cpu.Arch.thumb,
-    .cpu_model = std.zig.CrossTarget.CpuModel{ .explicit = &std.Target.arm.cpu.cortex_a7 },
-    .cpu_features_add = std.Target.arm.cpu.cortex_a5.features,
+    .cpu_model = std.zig.CrossTarget.CpuModel{ .explicit = &std.Target.arm.cpu.cortex_a53 },
+    // .cpu_features_add = std.Target.arm.cpu.cortex_a5.features,
     .os_tag = std.Target.Os.Tag.freestanding,
     .abi = std.Target.Abi.gnueabi,
 };
@@ -21,7 +21,13 @@ pub fn build(b: *std.Build, kernel: *std.Build.Module, comptime name: []const u8
         .target = Target,
         .optimize = optimize,
     });
-    elf.setLinkerScript(.{ .path = thisDir() ++ "ld/linker.ld" });
+
+    // elf.setLinkerScript(.{ .path = thisDir() ++ "ld/linker.ld" });
+    // elf.addAssemblyFile(.{ .path = thisDir() ++ "src/boot.S" });
+    elf.setLinkerScript(.{ .path = thisDir() ++ "../../bsp/raspberrypi/3b/kernel.ld" });
+    elf.addModule("cpu", b.createModule(.{ .source_file = .{ .path = thisDir() ++ "../../arch/aarch64/cpu.zig" } }));
+    elf.addModule("bsp", b.createModule(.{ .source_file = .{ .path = thisDir() ++ "../../bsp/raspberrypi/3b/cpu.zig" } }));
+    elf.addModule("boot", b.createModule(.{ .source_file = .{ .path = thisDir() ++ "../../arch/aarch64/boot.zig" } }));
     // elf.addAssemblyFile(.{ .path = thisDir() ++ "src/boot.S" });
     elf.addModule("kernel", kernel);
     const install_step = b.step(name, "Build rpi-os demo");
@@ -38,11 +44,11 @@ fn qemu(b: *std.Build, executable: *std.Build.Step.Compile, comptime name: []con
     var qemu_args = std.ArrayList([]const u8).init(b.allocator);
     defer qemu_args.deinit();
     try qemu_args.appendSlice(&[_][]const u8{
-        "qemu-system-arm",
+        "qemu-system-aarch64",
         "-m",
-        "1G",
+        "2G",
         "-M",
-        "raspi2b",
+        "raspi3b",
         "-serial",
         if (want_pty) "pty" else "stdio",
         "-display",

@@ -33,8 +33,8 @@ pub fn build(b: *std.Build) !void {
     //
     // b.default_step.dependOn(exe_step);
 
-    const example_rpi2 = @import("examples/rpi2b/build.zig");
-    try example_rpi2.build(b, kernel, "rpi2b");
+    const example_rpi2 = @import("examples/rpi3b/build.zig");
+    try example_rpi2.build(b, kernel, "rpi3b");
 }
 
 fn install(b: *std.Build, exe: *std.Build.CompileStep, comptime name: []const u8) void {
