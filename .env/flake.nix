@@ -26,6 +26,7 @@
               qemu
               zig
               zls
+              valgrind
             ];
 
             shellHook = ''

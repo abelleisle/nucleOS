@@ -46,7 +46,7 @@ fn qemu(b: *std.Build, executable: *std.Build.Step.Compile, comptime name: []con
     try qemu_args.appendSlice(&[_][]const u8{
         "qemu-system-aarch64",
         "-m",
-        "2G",
+        "1G",
         "-M",
         "raspi3b",
         "-serial",
