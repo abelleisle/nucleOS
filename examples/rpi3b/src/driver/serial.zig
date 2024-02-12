@@ -25,7 +25,8 @@ pub fn print(comptime format: []const u8, args: anytype) void {
     }
 }
 
-// This overrides the logging for std.log
+/// This overrides the logging for std.log
+/// Shamelessly store from microzig
 // zig fmt: off
 pub fn log(
     comptime level: std.log.Level,
