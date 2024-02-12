@@ -5,24 +5,30 @@ const cpu = @import("cpu");
 usingnamespace @import("bsp");
 usingnamespace @import("boot");
 
-const uart = @import("driver/uart.zig");
+const serial = @import("driver/serial.zig");
 
 export fn kernel_init() noreturn {
-    uart.init();
-    uart.puts("Hello, world!\r\n");
+    serial.init();
+    serial.print("Hello, world!\r\n", .{});
 
     while (true) {
-        uart.putc(uart.getc());
+        // serial.writeByte(serial.readByte());
     }
 
     hang();
 }
 
+pub const std_options = struct {
+    pub const log_level = .debug;
+    pub const logFn = log;
+};
+
+pub const log = serial.log;
+
 pub fn panic(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
-    uart.puts("!\n! ========================================================= !\n");
-    uart.puts("! KERNEL PANIC\n");
-    uart.puts("! Reason: ");
-    uart.puts(message);
+    std.log.err("!\n! ========================================================= !\n", .{});
+    std.log.err("! KERNEL PANIC\n", .{});
+    std.log.err("! Reason: {s}\n", .{message});
 
     hang();
 }
