@@ -8,7 +8,7 @@ This is a stub mirror. The source code lives on Forgejo.
 
 | Branch | Commit | Link |
 |--------|--------|------|
-| `zigify` | `e28b18cb079a` | [view](https://git.bitcicle.com/andy/nucleOS/src/commit/e28b18cb079ae93be1bfe90ef4ef86002c3f48be) |
+| `zigify` | `a373c14793f4` | [view](https://git.bitcicle.com/andy/nucleOS/src/commit/a373c14793f455919201deeb6da0bc57f44e7b5b) |
 | `guest` | `16023b4f9401` | [view](https://git.bitcicle.com/andy/nucleOS/src/commit/16023b4f94018b9ab113e05ebfab57b621dd2783) |
 | `master` | `dd65be48b9b9` | [view](https://git.bitcicle.com/andy/nucleOS/src/commit/dd65be48b9b9261307727b6d696521ab9c47a827) |
 | `hyper` | `71e4248e3a60` | [view](https://git.bitcicle.com/andy/nucleOS/src/commit/71e4248e3a6090a7d535ef97ed654ae29d09cb8a) |
@@ -17,4 +17,4 @@ This is a stub mirror. The source code lives on Forgejo.
 
 ---
 
-*Last updated: 2026-11-12 01:20:33 UTC*
+*Last updated: 2026-11-12 02:20:15 UTC*
